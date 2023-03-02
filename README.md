@@ -1,4 +1,9 @@
-Assignments for [Berkeley CS 285: Deep Reinforcement Learning, Decision Making, and Control](http://rail.eecs.berkeley.edu/deeprlcourse/).
+Deep Reinforcement Learning Homeworks
+=====================================
+
+My solutions for the assignments for [Berkeley CS 285: Deep Reinforcement Learning, Decision Making, and Control](http://rail.eecs.berkeley.edu/deeprlcourse/).
+
+I develop and run things using [vast.ai](https://vast.ai/). For this I've built a handy Docker image (see below).
 
 
 Using Docker
