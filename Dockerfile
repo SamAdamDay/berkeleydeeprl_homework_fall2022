@@ -38,6 +38,9 @@ RUN --mount=type=secret,id=my_env,mode=0444 /bin/bash -c 'source /run/secrets/my
     && mkdir -p .ssh \
     && echo ${SSH_PUBKEY} > .ssh/authorized_keys'
 
+# Add ~/.local/bin to the path
+ENV PATH=/home/${user}/.local/bin:/usr/local/nvidia/bin:/usr/local/cuda/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin
+
 # Move to the repo directory
 WORKDIR Homeworks
 
