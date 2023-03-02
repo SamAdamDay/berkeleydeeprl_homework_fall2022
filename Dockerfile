@@ -1,9 +1,6 @@
 # syntax=docker/dockerfile:1
 FROM nvidia/cuda:11.4.0-runtime-ubuntu20.04
 
-# The linux user which will be created
-ARG user=user
-
 # Set the timezone environmental variable
 ENV TZ=Europe/London
 
@@ -19,15 +16,10 @@ RUN pip3 install torch torchvision torchaudio --extra-index-url https://download
 
 # Unminimize Ubunutu, and install a bunch of necessary/helpful packages
 RUN yes | unminimize
-RUN DEBIAN_FRONTEND=noninteractive apt install -y sudo ubuntu-server openssh-server python-is-python3 git python3-venv
+RUN DEBIAN_FRONTEND=noninteractive apt install -y ubuntu-server openssh-server python-is-python3 git python3-venv build-essential curl git gnupg2 make cmake ffmpeg swig libz-dev unzip zlib1g-dev libglfw3 libglfw3-dev libxrandr2 libxinerama-dev libxi6 libxcursor-dev libgl1-mesa-dev libgl1-mesa-glx libglew-dev libosmesa6-dev lsb-release ack-grep patchelf wget xpra xserver-xorg-dev xvfb python-opengl ffmpeg
 
-# Create a new user and allow them passwordless sudo
-RUN useradd --create-home --groups sudo --shell /bin/bash ${user} \
-    && echo '%sudo	ALL = (ALL) NOPASSWD: ALL' > /etc/sudoers.d/passwordless-sudo
-
-# Switch to this new user
-USER ${user}
-WORKDIR /home/${user}
+# Move to the root home directory
+WORKDIR /root
 
 # Do all the things which require secrets: set up git, login to Weights &
 # Biases and clone the repo
@@ -38,21 +30,20 @@ RUN --mount=type=secret,id=my_env,mode=0444 /bin/bash -c 'source /run/secrets/my
     && mkdir -p .ssh \
     && echo ${SSH_PUBKEY} > .ssh/authorized_keys'
 
-# Add ~/.local/bin to the path
-ENV PATH=/home/${user}/.local/bin:/usr/local/nvidia/bin:/usr/local/cuda/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin
+# Add /root/.local/bin to the path
+ENV PATH=/root/.local/bin:/usr/local/nvidia/bin:/usr/local/cuda/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin
 
 # Move to the repo directory
 WORKDIR Homeworks
 
 # Install all the required packages
-RUN pip install --user --upgrade pip \
-    && pip install --user wheel \
-    && pip install --user -r requirements.txt \
-    && pip install --user nvitop
+RUN pip install --upgrade pip \
+    && pip install wheel \
+    && pip install -r requirements.txt \
+    && pip install nvitop
 
 # Go back to the root
-USER root
-WORKDIR /
+WORKDIR /root
 
 # Expose the default SSH port (inside the container)
 EXPOSE 22
