@@ -1,0 +1,1 @@
+runuser -l ${user} -c 'cd ~/Homeworks; git pull'; touch ~/.no_auto_tmux

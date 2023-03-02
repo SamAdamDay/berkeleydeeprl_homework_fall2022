@@ -29,3 +29,10 @@ docker build -t DOCKER_REPO:DOCKER_TAG --build-arg user=USER --secret id=my_env,
 replacing `DOCKER_REPO` and `DOCKER_TAG` with the appropriate details and `USER` with your desired username for the linux user (i.e. your home directory will be `/home/USER/`).
 
 5. Push the image to the Docker Hub, ready for use.
+
+
+Using with Vast.ai
+------------------
+
+1. Use the docker image you built and uploaded to the Hub.
+2. Set the 'on-start script' to be [`vastai-startup-script`](/vastai-startup-script), replacing `${user}` with your username.
