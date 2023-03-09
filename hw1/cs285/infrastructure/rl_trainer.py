@@ -1,6 +1,8 @@
 from collections import OrderedDict
 import numpy as np
 import time
+import pickle
+from typing import Optional, Tuple
 
 import gym
 import torch
@@ -8,6 +10,8 @@ import torch
 from cs285.infrastructure import pytorch_util as ptu
 from cs285.infrastructure.logger import Logger
 from cs285.infrastructure import utils
+from cs285.policies.base_policy import BasePolicy
+from cs285.agents.base_agent import BaseAgent
 
 # how many rollouts to save as videos to tensorboard
 MAX_NVIDEO = 2
@@ -37,7 +41,9 @@ class RL_Trainer(object):
         # Make the gym environment
         if self.params["video_log_freq"] == -1:
             self.params["env_kwargs"]["render_mode"] = None
-        self.env = gym.make(self.params["env_name"], **self.params["env_kwargs"])
+        self.env: gym.Env = gym.make(
+            self.params["env_name"], **self.params["env_kwargs"]
+        )
         self.env.reset(seed=seed)
 
         # Maximum length for episodes
@@ -64,18 +70,18 @@ class RL_Trainer(object):
         ## AGENT
         #############
 
-        agent_class = self.params["agent_class"]
+        agent_class: type[BaseAgent] = self.params["agent_class"]
         self.agent = agent_class(self.env, self.params["agent_params"])
 
     def run_training_loop(
         self,
-        n_iter,
-        collect_policy,
-        eval_policy,
-        initial_expertdata=None,
-        relabel_with_expert=False,
-        start_relabel_with_expert=1,
-        expert_policy=None,
+        n_iter: int,
+        collect_policy: BasePolicy,
+        eval_policy: BasePolicy,
+        initial_expertdata: Optional[str] = None,
+        relabel_with_expert: bool = False,
+        start_relabel_with_expert: int = 1,
+        expert_policy: Optional[BasePolicy] = None,
     ):
         """
         :param n_iter:  number of (dagger) iterations
@@ -147,11 +153,11 @@ class RL_Trainer(object):
 
     def collect_training_trajectories(
         self,
-        itr,
-        load_initial_expertdata,
-        collect_policy,
-        batch_size,
-    ):
+        itr: int,
+        load_initial_expertdata: string,
+        collect_policy: BasePolicy,
+        batch_size: int,
+    ) -> Tuple[list[dict], int, list[dict]]:
         """
         :param itr:
         :param load_initial_expertdata:  path to expert data pkl file
@@ -204,7 +210,9 @@ class RL_Trainer(object):
             all_logs.append(train_log)
         return all_logs
 
-    def do_relabel_with_expert(self, expert_policy, paths):
+    def do_relabel_with_expert(
+        self, expert_policy: BasePolicy, paths: list[dict]
+    ) -> list[dict]:
         print(
             "\nRelabelling collected observations with labels from an expert policy..."
         )
@@ -219,7 +227,12 @@ class RL_Trainer(object):
     ####################################
 
     def perform_logging(
-        self, itr, paths, eval_policy, train_video_paths, training_logs
+        self,
+        itr: int,
+        paths: list[dict],
+        eval_policy: BasePolicy,
+        train_video_paths: list[dict],
+        training_logs: list,
     ):
         # collect eval trajectories, for logging
         print("\nCollecting data for eval...")
