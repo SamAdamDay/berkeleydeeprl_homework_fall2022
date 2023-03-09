@@ -4,9 +4,11 @@ import torch.optim as optim
 from torch import nn
 import torch
 
+
 def init_method_1(model):
     model.weight.data.uniform_()
     model.bias.data.uniform_()
+
 
 def init_method_2(model):
     model.weight.data.normal_()
@@ -16,10 +18,10 @@ def init_method_2(model):
 class RNDModel(nn.Module, BaseExplorationModel):
     def __init__(self, hparams, optimizer_spec, **kwargs):
         super().__init__(**kwargs)
-        self.ob_dim = hparams['ob_dim']
-        self.output_size = hparams['rnd_output_size']
-        self.n_layers = hparams['rnd_n_layers']
-        self.size = hparams['rnd_size']
+        self.ob_dim = hparams["ob_dim"]
+        self.output_size = hparams["rnd_output_size"]
+        self.n_layers = hparams["rnd_n_layers"]
+        self.size = hparams["rnd_size"]
         self.optimizer_spec = optimizer_spec
 
         # <DONE>: Create two neural networks:

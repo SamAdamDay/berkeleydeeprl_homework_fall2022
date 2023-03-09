@@ -6,8 +6,8 @@ import torch.nn as nn
 
 def soft_update_params(net, target_net, tau):
     for param, target_param in zip(net.parameters(), target_net.parameters()):
-        target_param.data.copy_(tau * param.data +
-                                (1 - tau) * target_param.data)
+        target_param.data.copy_(tau * param.data + (1 - tau) * target_param.data)
+
 
 class TanhTransform(dist.transforms.Transform):
     domain = dist.constraints.real
@@ -36,7 +36,7 @@ class TanhTransform(dist.transforms.Transform):
     def log_abs_det_jacobian(self, x, y):
         # We use a formula that is more numerically stable, see details in the following link
         # https://github.com/tensorflow/probability/commit/ef6bb176e0ebd1cf6e25c6b5cecdd2428c22963f#diff-e120f70e92e6741bca649f04fcd907b7
-        return 2. * (math.log(2.) - x - F.softplus(-2. * x))
+        return 2.0 * (math.log(2.0) - x - F.softplus(-2.0 * x))
 
 
 class SquashedNormal(dist.transformed_distribution.TransformedDistribution):

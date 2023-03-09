@@ -2,9 +2,11 @@ import numpy as np
 import gym
 from gym import spaces
 
+
 class ReturnWrapper(gym.Wrapper):
     def get_episode_rewards(self):
         return list(self.env.return_queue)
+
 
 class NoopResetEnv(gym.Wrapper):
     def __init__(self, env, noop_max=30):
@@ -15,15 +17,17 @@ class NoopResetEnv(gym.Wrapper):
         self.noop_max = noop_max
         self.override_num_noops = None
         self.noop_action = 0
-        assert env.unwrapped.get_action_meanings()[0] == 'NOOP'
+        assert env.unwrapped.get_action_meanings()[0] == "NOOP"
 
     def reset(self, **kwargs):
-        """ Do no-op action for a number of steps in [1, noop_max]."""
+        """Do no-op action for a number of steps in [1, noop_max]."""
         self.env.reset(**kwargs)
         if self.override_num_noops is not None:
             noops = self.override_num_noops
         else:
-            noops = self.unwrapped.np_random.integers(1, self.noop_max + 1) #pylint: disable=E1101
+            noops = self.unwrapped.np_random.integers(
+                1, self.noop_max + 1
+            )  # pylint: disable=E1101
         assert noops > 0
         obs = None
         for _ in range(noops):
@@ -40,7 +44,7 @@ class FireResetEnv(gym.Wrapper):
     def __init__(self, env):
         """Take action on reset for environments that are fixed until firing."""
         gym.Wrapper.__init__(self, env)
-        assert env.unwrapped.get_action_meanings()[1] == 'FIRE'
+        assert env.unwrapped.get_action_meanings()[1] == "FIRE"
         assert len(env.unwrapped.get_action_meanings()) >= 3
 
     def reset(self, **kwargs):
@@ -64,7 +68,7 @@ class EpisodicLifeEnv(gym.Wrapper):
         """
         gym.Wrapper.__init__(self, env)
         self.lives = 0
-        self.was_real_done  = True
+        self.was_real_done = True
 
     def step(self, action):
         obs, reward, done, info = self.env.step(action)
@@ -99,8 +103,8 @@ class MaxAndSkipEnv(gym.Wrapper):
         """Return only every `skip`-th frame"""
         gym.Wrapper.__init__(self, env)
         # most recent raw observations (for max pooling across time steps)
-        self._obs_buffer = np.zeros((2,)+env.observation_space.shape, dtype=np.uint8)
-        self._skip       = skip
+        self._obs_buffer = np.zeros((2,) + env.observation_space.shape, dtype=np.uint8)
+        self._skip = skip
 
     def step(self, action):
         """Repeat action, sum reward, and max over last observations."""
@@ -108,8 +112,10 @@ class MaxAndSkipEnv(gym.Wrapper):
         done = None
         for i in range(self._skip):
             obs, reward, done, info = self.env.step(action)
-            if i == self._skip - 2: self._obs_buffer[0] = obs
-            if i == self._skip - 1: self._obs_buffer[1] = obs
+            if i == self._skip - 2:
+                self._obs_buffer[0] = obs
+            if i == self._skip - 1:
+                self._obs_buffer[1] = obs
             total_reward += reward
             if done:
                 break
@@ -125,9 +131,10 @@ class MaxAndSkipEnv(gym.Wrapper):
 
 def _process_frame84(frame):
     import cv2
+
     img = np.reshape(frame, [210, 160, 3]).astype(np.float32)
     img = img[:, :, 0] * 0.299 + img[:, :, 1] * 0.587 + img[:, :, 2] * 0.114
-    resized_screen = cv2.resize(img, (84, 110),  interpolation=cv2.INTER_LINEAR)
+    resized_screen = cv2.resize(img, (84, 110), interpolation=cv2.INTER_LINEAR)
     x_t = resized_screen[18:102, :]
     x_t = np.reshape(x_t, [84, 84, 1])
     return x_t.astype(np.uint8)
@@ -159,19 +166,18 @@ def wrap_deepmind_ram(env):
     env = EpisodicLifeEnv(env)
     env = NoopResetEnv(env, noop_max=30)
     env = MaxAndSkipEnv(env, skip=4)
-    if 'FIRE' in env.unwrapped.get_action_meanings():
+    if "FIRE" in env.unwrapped.get_action_meanings():
         env = FireResetEnv(env)
     env = ClipRewardEnv(env)
     return env
 
 
 def wrap_deepmind(env):
-    """Configure environment for DeepMind-style Atari.
-    """
+    """Configure environment for DeepMind-style Atari."""
     env = EpisodicLifeEnv(env)
     env = NoopResetEnv(env, noop_max=30)
     env = MaxAndSkipEnv(env, skip=4)
-    if 'FIRE' in env.unwrapped.get_action_meanings():
+    if "FIRE" in env.unwrapped.get_action_meanings():
         env = FireResetEnv(env)
     env = ProcessFrame84(env)
     env = ClipRewardEnv(env)
