@@ -18,7 +18,7 @@ MJ_ENV_KWARGS["Ant-v4"]["use_contact_forces"] = True
 
 def sample_trajectory(
     env: Env, policy: BasePolicy, max_path_length: int, render: bool = False
-):
+) -> dict:
     # initialize env for the beginning of a new rollout
     ob = TODO  # HINT: should be the output of resetting the env
 
@@ -66,7 +66,7 @@ def sample_trajectories(
     min_timesteps_per_batch: int,
     max_path_length: int,
     render: bool = False,
-):
+) -> Tuple[list[dict], int]:
     """
     Collect rollouts until we have collected min_timesteps_per_batch steps.
 
@@ -88,7 +88,7 @@ def sample_n_trajectories(
     ntraj: int,
     max_path_length: int,
     render: bool = False,
-):
+) -> list[dict]:
     """
     Collect ntraj rollouts.
 
@@ -113,7 +113,7 @@ def Path(
     rewards: list,
     next_obs: list,
     terminals: list,
-):
+) -> dict:
     """
     Take info (separate arrays) from a single rollout
     and return it in a single dictionary
@@ -153,5 +153,5 @@ def convert_listofrollouts(
 ############################################
 
 
-def get_pathlength(path: dict):
+def get_pathlength(path: dict) -> int:
     return len(path["reward"])

@@ -1,19 +1,24 @@
-from cs285.infrastructure.utils import *
+from typing import Optional, Tuple
+
+import numpy as np
+from numpy.typing import ArrayLike
+
+from cs285.infrastructure.utils import convert_listofrollouts
 
 
 class ReplayBuffer(object):
-    def __init__(self, max_size=1000000):
+    def __init__(self, max_size: int = 1000000):
         self.max_size = max_size
 
         # store each rollout
         self.paths = []
 
         # store (concatenated) component arrays from each rollout
-        self.obs = None
-        self.acs = None
-        self.rews = None
-        self.next_obs = None
-        self.terminals = None
+        self.obs: Optional[ArrayLike] = None
+        self.acs: Optional[ArrayLike] = None
+        self.rews: Optional[ArrayLike] = None
+        self.next_obs: Optional[ArrayLike] = None
+        self.terminals: Optional[ArrayLike] = None
 
     def __len__(self):
         if self.obs:
@@ -21,7 +26,7 @@ class ReplayBuffer(object):
         else:
             return 0
 
-    def add_rollouts(self, paths, concat_rew=True):
+    def add_rollouts(self, paths: list[dict], concat_rew: Optional[bool] = True):
         # add new rollouts into our list of rollouts
         for path in paths:
             self.paths.append(path)
@@ -63,7 +68,9 @@ class ReplayBuffer(object):
     ########################################
     ########################################
 
-    def sample_random_data(self, batch_size):
+    def sample_random_data(
+        self, batch_size: int
+    ) -> Tuple[ArrayLike, ArrayLike, ArrayLike, ArrayLike, ArrayLike]:
         assert (
             self.obs.shape[0]
             == self.acs.shape[0]
@@ -79,7 +86,9 @@ class ReplayBuffer(object):
 
         return TODO, TODO, TODO, TODO, TODO
 
-    def sample_recent_data(self, batch_size=1):
+    def sample_recent_data(
+        self, batch_size: int = 1
+    ) -> Tuple[ArrayLike, ArrayLike, ArrayLike, ArrayLike, ArrayLike]:
         return (
             self.obs[-batch_size:],
             self.acs[-batch_size:],
