@@ -1,3 +1,7 @@
+from typing import Tuple
+
+from numpy.typing import NDArray
+
 from gym import Env
 
 from cs285.infrastructure.replay_buffer import ReplayBuffer
@@ -26,16 +30,25 @@ class BCAgent(BaseAgent):
         # replay buffer
         self.replay_buffer = ReplayBuffer(self.agent_params["max_replay_buffer_size"])
 
-    def train(self, ob_no, ac_na, re_n, next_ob_no, terminal_n):
+    def train(
+        self,
+        ob_batch: NDArray,
+        ac_batch: NDArray,
+        re_batch: NDArray,
+        next_ob_batch: NDArray,
+        terminal_batch: NDArray,
+    ) -> dict:
         # training a BC agent refers to updating its actor using
         # the given observations and corresponding action labels
-        log = self.actor.update(ob_no, ac_na)  # HW1: you will modify this
+        log = self.actor.update(ob_batch, ac_batch)  # HW1: you will modify this
         return log
 
     def add_to_replay_buffer(self, paths: list[dict]):
         self.replay_buffer.add_rollouts(paths)
 
-    def sample(self, batch_size: int):
+    def sample(
+        self, batch_size: int
+    ) -> Tuple[NDArray, NDArray, NDArray, NDArray, NDArray]:
         return self.replay_buffer.sample_random_data(
             batch_size
         )  # HW1: you will modify this

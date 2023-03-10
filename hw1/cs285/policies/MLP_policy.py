@@ -6,6 +6,7 @@ from torch.nn import functional as F
 from torch import optim
 
 import numpy as np
+from numpy.typing import NDArray
 import torch
 from torch import distributions
 
@@ -16,14 +17,14 @@ from cs285.policies.base_policy import BasePolicy
 class MLPPolicy(BasePolicy, nn.Module, metaclass=abc.ABCMeta):
     def __init__(
         self,
-        ac_dim,
-        ob_dim,
-        n_layers,
-        size,
-        discrete=False,
-        learning_rate=1e-4,
-        training=True,
-        nn_baseline=False,
+        ac_dim: int,
+        ob_dim: int,
+        n_layers: int,
+        size: int,
+        discrete: bool = False,
+        learning_rate: float = 1e-4,
+        training: bool = True,
+        nn_baseline: bool = False,
         **kwargs
     ):
         super().__init__(**kwargs)
@@ -69,12 +70,12 @@ class MLPPolicy(BasePolicy, nn.Module, metaclass=abc.ABCMeta):
 
     ##################################
 
-    def save(self, filepath):
+    def save(self, filepath: int):
         torch.save(self.state_dict(), filepath)
 
     ##################################
 
-    def get_action(self, obs: np.ndarray) -> np.ndarray:
+    def get_action(self, obs: NDArray) -> NDArray:
         if len(obs.shape) > 1:
             observation = obs
         else:
@@ -101,7 +102,7 @@ class MLPPolicy(BasePolicy, nn.Module, metaclass=abc.ABCMeta):
 
 
 class MLPPolicySL(MLPPolicy):
-    def __init__(self, ac_dim, ob_dim, n_layers, size, **kwargs):
+    def __init__(self, ac_dim: int, ob_dim: int, n_layers: int, size: int, **kwargs):
         super().__init__(ac_dim, ob_dim, n_layers, size, **kwargs)
         self.loss = nn.MSELoss()
 

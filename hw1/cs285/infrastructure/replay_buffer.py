@@ -1,7 +1,7 @@
 from typing import Optional, Tuple
 
 import numpy as np
-from numpy.typing import ArrayLike
+from numpy.typing import NDArray
 
 from cs285.infrastructure.utils import convert_listofrollouts
 
@@ -14,11 +14,11 @@ class ReplayBuffer(object):
         self.paths = []
 
         # store (concatenated) component arrays from each rollout
-        self.obs: Optional[ArrayLike] = None
-        self.acs: Optional[ArrayLike] = None
-        self.rews: Optional[ArrayLike] = None
-        self.next_obs: Optional[ArrayLike] = None
-        self.terminals: Optional[ArrayLike] = None
+        self.obs: Optional[NDArray] = None
+        self.acs: Optional[NDArray] = None
+        self.rews: Optional[NDArray] = None
+        self.next_obs: Optional[NDArray] = None
+        self.terminals: Optional[NDArray] = None
 
     def __len__(self):
         if self.obs:
@@ -70,7 +70,7 @@ class ReplayBuffer(object):
 
     def sample_random_data(
         self, batch_size: int
-    ) -> Tuple[ArrayLike, ArrayLike, ArrayLike, ArrayLike, ArrayLike]:
+    ) -> Tuple[NDArray, NDArray, NDArray, NDArray, NDArray]:
         assert (
             self.obs.shape[0]
             == self.acs.shape[0]
@@ -88,7 +88,7 @@ class ReplayBuffer(object):
 
     def sample_recent_data(
         self, batch_size: int = 1
-    ) -> Tuple[ArrayLike, ArrayLike, ArrayLike, ArrayLike, ArrayLike]:
+    ) -> Tuple[NDArray, NDArray, NDArray, NDArray, NDArray]:
         return (
             self.obs[-batch_size:],
             self.acs[-batch_size:],

@@ -2,7 +2,7 @@ import time
 from typing import Tuple
 
 import numpy as np
-from numpy.typing import ArrayLike
+from numpy.typing import NDArray
 
 from gym import Env
 
@@ -90,14 +90,13 @@ def sample_n_trajectories(
     render: bool = False,
 ) -> list[dict]:
     """
-    Collect ntraj rollouts.
-
-    TODO implement this function
-    Hint1: use sample_trajectory to get each path (i.e. rollout) that goes into paths
+    Collect `ntraj` rollouts.
     """
     paths = []
 
-    TODO
+    for i in range(ntraj):
+        path = sample_trajectory(env, policy, max_path_length, render)
+        paths.append(path)
 
     return paths
 
@@ -132,7 +131,7 @@ def Path(
 
 def convert_listofrollouts(
     paths: list[dict], concat_rew: bool = True
-) -> Tuple[ArrayLike, ArrayLike, ArrayLike, ArrayLike, ArrayLike]:
+) -> Tuple[NDArray, NDArray, NDArray, NDArray, NDArray]:
     """
     Take a list of rollout dictionaries
     and return separate arrays,
