@@ -1,5 +1,12 @@
-import numpy as np
 import time
+from typing import Tuple
+
+import numpy as np
+from numpy.typing import ArrayLike
+
+from gym import Env
+
+from cs285.policies.base_policy import BasePolicy
 
 ############################################
 ############################################
@@ -9,7 +16,9 @@ MJ_ENV_KWARGS = {name: {"render_mode": "rgb_array"} for name in MJ_ENV_NAMES}
 MJ_ENV_KWARGS["Ant-v4"]["use_contact_forces"] = True
 
 
-def sample_trajectory(env, policy, max_path_length, render=False):
+def sample_trajectory(
+    env: Env, policy: BasePolicy, max_path_length: int, render: bool = False
+):
     # initialize env for the beginning of a new rollout
     ob = TODO  # HINT: should be the output of resetting the env
 
@@ -52,7 +61,11 @@ def sample_trajectory(env, policy, max_path_length, render=False):
 
 
 def sample_trajectories(
-    env, policy, min_timesteps_per_batch, max_path_length, render=False
+    env: Env,
+    policy: BasePolicy,
+    min_timesteps_per_batch: int,
+    max_path_length: int,
+    render: bool = False,
 ):
     """
     Collect rollouts until we have collected min_timesteps_per_batch steps.
@@ -69,7 +82,13 @@ def sample_trajectories(
     return paths, timesteps_this_batch
 
 
-def sample_n_trajectories(env, policy, ntraj, max_path_length, render=False):
+def sample_n_trajectories(
+    env: Env,
+    policy: BasePolicy,
+    ntraj: int,
+    max_path_length: int,
+    render: bool = False,
+):
     """
     Collect ntraj rollouts.
 
@@ -87,7 +106,14 @@ def sample_n_trajectories(env, policy, ntraj, max_path_length, render=False):
 ############################################
 
 
-def Path(obs, image_obs, acs, rewards, next_obs, terminals):
+def Path(
+    obs: list,
+    image_obs: list,
+    acs: list,
+    rewards: list,
+    next_obs: list,
+    terminals: list,
+):
     """
     Take info (separate arrays) from a single rollout
     and return it in a single dictionary
@@ -104,7 +130,9 @@ def Path(obs, image_obs, acs, rewards, next_obs, terminals):
     }
 
 
-def convert_listofrollouts(paths, concat_rew=True):
+def convert_listofrollouts(
+    paths: list[dict], concat_rew: bool = True
+) -> Tuple[ArrayLike, ArrayLike, ArrayLike, ArrayLike, ArrayLike]:
     """
     Take a list of rollout dictionaries
     and return separate arrays,
@@ -125,5 +153,5 @@ def convert_listofrollouts(paths, concat_rew=True):
 ############################################
 
 
-def get_pathlength(path):
+def get_pathlength(path: dict):
     return len(path["reward"])
