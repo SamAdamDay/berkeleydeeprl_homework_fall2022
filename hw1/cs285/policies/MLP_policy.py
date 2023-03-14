@@ -70,7 +70,7 @@ class MLPPolicy(BasePolicy, nn.Module, metaclass=abc.ABCMeta):
 
     ##################################
 
-    def save(self, filepath: int):
+    def save(self, filepath: str):
         torch.save(self.state_dict(), filepath)
 
     ##################################
@@ -81,8 +81,15 @@ class MLPPolicy(BasePolicy, nn.Module, metaclass=abc.ABCMeta):
         else:
             observation = obs[None]
 
-        # TODO return the action that the policy prescribes
-        raise NotImplementedError
+        observation = torch.from_numpy(observation)
+
+        # Build the probability distribution over actions
+        distribution = self.forward(observation)
+
+        # Sample an action
+        action = distribution.sample()
+
+        return action.detatch().cpu().numpy()
 
     # update/train this policy
     def update(self, observations, actions, **kwargs):
@@ -93,9 +100,15 @@ class MLPPolicy(BasePolicy, nn.Module, metaclass=abc.ABCMeta):
     # through it. For example, you can return a torch.FloatTensor. You can also
     # return more flexible objects, such as a
     # `torch.distributions.Distribution` object. It's up to you!
-    def forward(self, observation: torch.FloatTensor) -> Any:
-        raise NotImplementedError
-
+    def forward(self, observation: torch.FloatTensor) -> distributions.Distribution:
+        
+        if self.discrete:
+            logits = self.logits_na(observation)
+            return distributions.Categorical(logits=logits)
+        else:
+            mean = self.mean_net(observation)
+            std = torch.exp(self.logstd)
+            return distributions.Normal(loc=mean, scale=std)
 
 #####################################################
 #####################################################
