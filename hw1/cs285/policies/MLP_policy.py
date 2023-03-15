@@ -92,7 +92,7 @@ class MLPPolicy(BasePolicy, nn.Module, metaclass=abc.ABCMeta):
         return action.detatch().cpu().numpy()
 
     # update/train this policy
-    def update(self, observations, actions, **kwargs):
+    def update(self, observations: NDArray, actions: NDArray, **kwargs) -> dict:
         raise NotImplementedError
 
     # This function defines the forward pass of the network.
@@ -101,7 +101,6 @@ class MLPPolicy(BasePolicy, nn.Module, metaclass=abc.ABCMeta):
     # return more flexible objects, such as a
     # `torch.distributions.Distribution` object. It's up to you!
     def forward(self, observation: torch.FloatTensor) -> distributions.Distribution:
-        
         if self.discrete:
             logits = self.logits_na(observation)
             return distributions.Categorical(logits=logits)
@@ -110,6 +109,7 @@ class MLPPolicy(BasePolicy, nn.Module, metaclass=abc.ABCMeta):
             std = torch.exp(self.logstd)
             return distributions.Normal(loc=mean, scale=std)
 
+
 #####################################################
 #####################################################
 
@@ -117,11 +117,40 @@ class MLPPolicy(BasePolicy, nn.Module, metaclass=abc.ABCMeta):
 class MLPPolicySL(MLPPolicy):
     def __init__(self, ac_dim: int, ob_dim: int, n_layers: int, size: int, **kwargs):
         super().__init__(ac_dim, ob_dim, n_layers, size, **kwargs)
-        self.loss = nn.MSELoss()
 
-    def update(self, observations, actions, adv_n=None, acs_labels_na=None, qvals=None):
-        # TODO: update the policy and return the loss
-        loss = TODO
+        if self.discrete:
+            self.loss = nn.CrossEntropyLoss()
+        else:
+            self.loss = nn.MSELoss()
+
+    def update(
+        self,
+        observations: NDArray,
+        actions: NDArray,
+        adv_n=None,
+        acs_labels_na=None,
+        qvals=None,
+    ) -> dict:
+        
+        observations = torch.from_numpy(observations)
+        actions = torch.from_numpy(actions)
+        
+        # Build the probability distribution over actions
+        distribution = self.forward(observations)
+
+        # Compute the loss either using cross entropy or MSE on sampled
+        # actions
+        if self.discrete:
+            loss = F.cross_entropy(distribution.probs, actions)
+        else:
+            sampled_actions = distribution.rsample()
+            loss = F.mse_loss(sampled_actions, actions)
+
+        # Backpropagation
+        self.optimizer.zero_grad()
+        loss.backward()
+        self.optimizer.step()
+
         return {
             # You can add extra logging information here, but keep this line
             "Training Loss": ptu.to_numpy(loss),
