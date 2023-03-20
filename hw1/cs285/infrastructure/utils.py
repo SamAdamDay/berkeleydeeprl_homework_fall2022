@@ -20,7 +20,7 @@ def sample_trajectory(
     env: Env, policy: BasePolicy, max_path_length: int, render: bool = False
 ) -> dict:
     # initialize env for the beginning of a new rollout
-    ob = env.reset() 
+    ob = env.reset()
 
     # init vars
     obs, acs, rewards, next_obs, terminals, image_obs = [], [], [], [], [], []

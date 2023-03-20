@@ -131,10 +131,9 @@ class MLPPolicySL(MLPPolicy):
         acs_labels_na=None,
         qvals=None,
     ) -> dict:
-        
         observations = torch.from_numpy(observations)
         actions = torch.from_numpy(actions)
-        
+
         # Build the probability distribution over actions
         distribution = self.forward(observations)
 
