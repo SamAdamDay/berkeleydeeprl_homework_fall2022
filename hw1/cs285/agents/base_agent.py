@@ -18,7 +18,7 @@ class BaseAgent(object):
         """Return a dictionary of logging information."""
         raise NotImplementedError
 
-    def add_to_replay_buffer(self, paths: list[dict]):
+    def add_to_replay_buffer(self, paths: "list[dict]"):
         raise NotImplementedError
 
     def sample(

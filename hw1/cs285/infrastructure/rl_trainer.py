@@ -157,7 +157,7 @@ class RL_Trainer(object):
         load_initial_expertdata: str,
         collect_policy: BasePolicy,
         batch_size: int,
-    ) -> Tuple[list[dict], int, Optional[list[dict]]]:
+    ) -> Tuple["list[dict]", int, Optional["list[dict]"]]:
         """
         :param itr:
         :param load_initial_expertdata:  path to expert data pkl file
@@ -214,8 +214,8 @@ class RL_Trainer(object):
         return all_logs
 
     def do_relabel_with_expert(
-        self, expert_policy: BasePolicy, paths: list[dict]
-    ) -> list[dict]:
+        self, expert_policy: BasePolicy, paths: "list[dict]"
+    ) -> "list[dict]":
         print(
             "\nRelabelling collected observations with labels from an expert policy..."
         )
@@ -234,9 +234,9 @@ class RL_Trainer(object):
     def perform_logging(
         self,
         itr: int,
-        paths: list[dict],
+        paths: "list[dict]",
         eval_policy: BasePolicy,
-        train_video_paths: list[dict],
+        train_video_paths: "list[dict]",
         training_logs: list,
     ):
         # collect eval trajectories, for logging

@@ -26,7 +26,7 @@ class ReplayBuffer(object):
         else:
             return 0
 
-    def add_rollouts(self, paths: list[dict], concat_rew: Optional[bool] = True):
+    def add_rollouts(self, paths: "list[dict]", concat_rew: Optional[bool] = True):
         # add new rollouts into our list of rollouts
         for path in paths:
             self.paths.append(path)

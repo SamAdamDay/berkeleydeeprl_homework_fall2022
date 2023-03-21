@@ -65,7 +65,7 @@ def sample_trajectories(
     min_timesteps_per_batch: int,
     max_path_length: int,
     render: bool = False,
-) -> Tuple[list[dict], int]:
+) -> Tuple["list[dict]", int]:
     """
     Collect rollouts until we have collected min_timesteps_per_batch steps.
     """
@@ -85,7 +85,7 @@ def sample_n_trajectories(
     ntraj: int,
     max_path_length: int,
     render: bool = False,
-) -> list[dict]:
+) -> "list[dict]":
     """
     Collect `ntraj` rollouts.
     """
@@ -127,7 +127,7 @@ def Path(
 
 
 def convert_listofrollouts(
-    paths: list[dict], concat_rew: bool = True
+    paths: "list[dict]", concat_rew: bool = True
 ) -> Tuple[NDArray, NDArray, NDArray, NDArray, NDArray]:
     """
     Take a list of rollout dictionaries

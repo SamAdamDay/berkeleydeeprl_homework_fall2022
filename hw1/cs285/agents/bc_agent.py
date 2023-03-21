@@ -43,7 +43,7 @@ class BCAgent(BaseAgent):
         log = self.actor.update(ob_batch, ac_batch)  # HW1: you will modify this
         return log
 
-    def add_to_replay_buffer(self, paths: list[dict]):
+    def add_to_replay_buffer(self, paths: "list[dict]"):
         self.replay_buffer.add_rollouts(paths)
 
     def sample(
