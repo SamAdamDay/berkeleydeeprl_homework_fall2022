@@ -82,6 +82,7 @@ class MLPPolicy(BasePolicy, nn.Module, metaclass=abc.ABCMeta):
             observation = obs[None]
 
         observation = torch.from_numpy(observation)
+        observation = observation.to(device=ptu.device, dtype=torch.float)
 
         # Build the probability distribution over actions
         distribution = self.forward(observation)
@@ -89,7 +90,7 @@ class MLPPolicy(BasePolicy, nn.Module, metaclass=abc.ABCMeta):
         # Sample an action
         action = distribution.sample()
 
-        return action.detatch().cpu().numpy()
+        return ptu.to_numpy(action)
 
     # update/train this policy
     def update(self, observations: NDArray, actions: NDArray, **kwargs) -> dict:
@@ -134,8 +135,8 @@ class MLPPolicySL(MLPPolicy):
         observations = torch.from_numpy(observations)
         actions = torch.from_numpy(actions)
 
-        observations.to(ptu.device)
-        actions.to(ptu.device)
+        observations = observations.to(ptu.device)
+        actions = actions.to(ptu.device)
 
         # Build the probability distribution over actions
         distribution = self.forward(observations)
