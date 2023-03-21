@@ -134,6 +134,9 @@ class MLPPolicySL(MLPPolicy):
         observations = torch.from_numpy(observations)
         actions = torch.from_numpy(actions)
 
+        observations.to(ptu.device)
+        actions.to(ptu.device)
+
         # Build the probability distribution over actions
         distribution = self.forward(observations)
 

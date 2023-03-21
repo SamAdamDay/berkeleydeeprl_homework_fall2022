@@ -172,7 +172,7 @@ class RL_Trainer(object):
         # On the first iteration just load the expert data
         if itr == 0:
             print("\nLoading expert data for training...")
-            with open(load_initial_expertdata) as f:
+            with open(load_initial_expertdata, "rb") as f:
                 loaded_paths = pickle.load(f)
             return loaded_paths, 0, None
 
