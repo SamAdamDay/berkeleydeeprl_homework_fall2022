@@ -13,18 +13,18 @@ from cs285.policies.base_policy import BasePolicy
 
 
 class MLPPolicy(BasePolicy, nn.Module, metaclass=abc.ABCMeta):
-
-    def __init__(self,
-                 ac_dim,
-                 ob_dim,
-                 n_layers,
-                 size,
-                 discrete=False,
-                 learning_rate=1e-4,
-                 training=True,
-                 nn_baseline=False,
-                 **kwargs
-                 ):
+    def __init__(
+        self,
+        ac_dim,
+        ob_dim,
+        n_layers,
+        size,
+        discrete=False,
+        learning_rate=1e-4,
+        training=True,
+        nn_baseline=False,
+        **kwargs
+    ):
         super().__init__(**kwargs)
 
         # init vars
@@ -38,20 +38,24 @@ class MLPPolicy(BasePolicy, nn.Module, metaclass=abc.ABCMeta):
         self.nn_baseline = nn_baseline
 
         if self.discrete:
-            self.logits_na = ptu.build_mlp(input_size=self.ob_dim,
-                                           output_size=self.ac_dim,
-                                           n_layers=self.n_layers,
-                                           size=self.size)
+            self.logits_na = ptu.build_mlp(
+                input_size=self.ob_dim,
+                output_size=self.ac_dim,
+                n_layers=self.n_layers,
+                size=self.size,
+            )
             self.logits_na.to(ptu.device)
             self.mean_net = None
             self.logstd = None
-            self.optimizer = optim.Adam(self.logits_na.parameters(),
-                                        self.learning_rate)
+            self.optimizer = optim.Adam(self.logits_na.parameters(), self.learning_rate)
         else:
             self.logits_na = None
-            self.mean_net = ptu.build_mlp(input_size=self.ob_dim,
-                                      output_size=self.ac_dim,
-                                      n_layers=self.n_layers, size=self.size)
+            self.mean_net = ptu.build_mlp(
+                input_size=self.ob_dim,
+                output_size=self.ac_dim,
+                n_layers=self.n_layers,
+                size=self.size,
+            )
             self.logstd = nn.Parameter(
                 torch.zeros(self.ac_dim, dtype=torch.float32, device=ptu.device)
             )
@@ -59,7 +63,7 @@ class MLPPolicy(BasePolicy, nn.Module, metaclass=abc.ABCMeta):
             self.logstd.to(ptu.device)
             self.optimizer = optim.Adam(
                 itertools.chain([self.logstd], self.mean_net.parameters()),
-                self.learning_rate
+                self.learning_rate,
             )
 
         if nn_baseline:
@@ -85,8 +89,22 @@ class MLPPolicy(BasePolicy, nn.Module, metaclass=abc.ABCMeta):
     ##################################
 
     # query the policy with observation(s) to get selected action(s)
-    def get_action(self, obs: np.ndarray) -> np.ndarray:
-        # TODO: get this from HW1
+    def get_action(self, obs: np.NDArray) -> np.NDArray:
+        if len(obs.shape) > 1:
+            observation = obs
+        else:
+            observation = obs[None]
+
+        observation = torch.from_numpy(observation)
+        observation = observation.to(device=ptu.device, dtype=torch.float)
+
+        # Build the probability distribution over actions
+        distribution = self.forward(observation)
+
+        # Sample an action
+        action = distribution.sample()
+
+        return ptu.to_numpy(action)
 
     # update/train this policy
     def update(self, observations, actions, **kwargs):
@@ -113,8 +131,10 @@ class MLPPolicy(BasePolicy, nn.Module, metaclass=abc.ABCMeta):
             )
             return action_distribution
 
+
 #####################################################
 #####################################################
+
 
 class MLPPolicyPG(MLPPolicy):
     def __init__(self, ac_dim, ob_dim, n_layers, size, **kwargs):
@@ -129,10 +149,10 @@ class MLPPolicyPG(MLPPolicy):
 
         # TODO: update the policy using policy gradient
         # HINT1: Recall that the expression that we want to MAXIMIZE
-            # is the expectation over collected trajectories of:
-            # sum_{t=0}^{T-1} [grad [log pi(a_t|s_t) * (Q_t - b_t)]]
+        # is the expectation over collected trajectories of:
+        # sum_{t=0}^{T-1} [grad [log pi(a_t|s_t) * (Q_t - b_t)]]
         # HINT2: you will want to use the `log_prob` method on the distribution returned
-            # by the `forward` method
+        # by the `forward` method
 
         TODO
 
@@ -142,23 +162,23 @@ class MLPPolicyPG(MLPPolicy):
             ## of zero and a standard deviation of one.
 
             ## Note: You will need to convert the targets into a tensor using
-                ## ptu.from_numpy before using it in the loss
+            ## ptu.from_numpy before using it in the loss
 
             TODO
 
         train_log = {
-            'Training Loss': ptu.to_numpy(loss),
+            "Training Loss": ptu.to_numpy(loss),
         }
         return train_log
 
     def run_baseline_prediction(self, observations):
         """
-            Helper function that converts `observations` to a tensor,
-            calls the forward method of the baseline MLP,
-            and returns a np array
+        Helper function that converts `observations` to a tensor,
+        calls the forward method of the baseline MLP,
+        and returns a np array
 
-            Input: `observations`: np.ndarray of size [N, 1]
-            Output: np.ndarray of size [N]
+        Input: `observations`: np.ndarray of size [N, 1]
+        Output: np.ndarray of size [N]
 
         """
         observations = ptu.from_numpy(observations)
