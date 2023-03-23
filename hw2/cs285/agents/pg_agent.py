@@ -1,6 +1,7 @@
 from typing import Tuple
 
 import numpy as np
+from numpy.typing import NDArray
 from gym import Env
 
 from .base_agent import BaseAgent
@@ -37,24 +38,28 @@ class PGAgent(BaseAgent):
 
     def train(
         self,
-        observations: np.NDArray,
-        actions: np.NDArray,
-        rewards_list: np.NDArray,
-        next_observations: np.NDArray,
-        terminals: np.NDArray,
+        observations: NDArray,
+        actions: NDArray,
+        rewards_list: NDArray,
+        next_observations: NDArray,
+        terminals: NDArray,
     ) -> dict:
         """
         Training a PG agent refers to updating its actor using the given observations/actions
         and the calculated qvals/advantages that come from the seen rewards.
         """
 
-        # TODO: update the PG actor/policy using the given batch of data
-        # using helper functions to compute qvals and advantages, and
-        # return the train_log obtained from updating the policy
+        q_values = self.calculate_q_vals(rewards_list)
+        advantages = self.estimate_advantage(
+            observations, rewards_list, q_values, terminals
+        )
+
+        # Do gradient descent to update the parameters
+        train_log = self.actor.update(observations, actions, advantages, q_values)
 
         return train_log
 
-    def calculate_q_vals(self, rewards_list: list) -> np.NDArray:
+    def calculate_q_vals(self, rewards_list: NDArray) -> NDArray:
         """
         Monte Carlo estimation of the Q function.
         """
@@ -77,28 +82,28 @@ class PGAgent(BaseAgent):
         # then flattened to a 1D numpy array.
 
         if not self.reward_to_go:
-            TODO
+            discounted_return = self._discounted_return(rewards_list)
 
         # Case 2: reward-to-go PG
         # Estimate Q^{pi}(s_t, a_t) by the discounted sum of rewards starting from t
         else:
-            TODO
+            discounte_cumsum = self._discounted_cumsum(rewards_list)
 
         return q_values
 
     def estimate_advantage(
         self,
-        obs: np.NDArray,
-        rews_list: np.NDArray,
-        q_values: np.NDArray,
-        terminals: np.NDArray,
-    ) -> np.NDArray:
+        obs: NDArray,
+        rews_list: NDArray,
+        q_values: NDArray,
+        terminals: NDArray,
+    ) -> NDArray:
         """
         Computes advantages by (possibly) using GAE, or subtracting a baseline from the estimated Q values
         """
 
-        # Estimate the advantage when nn_baseline is True,
-        # by querying the neural network that you're using to learn the value function
+        # Estimate the advantage when nn_baseline is True, by querying the
+        # neural network that you're using to learn the value function
         if self.nn_baseline:
             values_unnormalized = self.actor.run_baseline_prediction(obs)
             ## ensure that the value predictions and q_values have the same dimensionality
@@ -155,29 +160,58 @@ class PGAgent(BaseAgent):
 
     def sample(
         self, batch_size: int
-    ) -> Tuple[np.NDArray, np.NDArray, np.NDArray, np.NDArray, np.NDArray]:
+    ) -> Tuple[NDArray, NDArray, NDArray, NDArray, NDArray]:
         return self.replay_buffer.sample_recent_data(batch_size, concat_rew=False)
 
     #####################################################
     ################## HELPER FUNCTIONS #################
     #####################################################
 
-    def _discounted_return(self, rewards):
+    def _discounted_return(self, rewards: NDArray) -> NDArray:
         """
         Helper function
 
-        Input: list of rewards {r_0, r_1, ..., r_t', ... r_T} from a single rollout of length T
+        Input: An 2D array where each row is {r_i0, r_i1, ..., r_it', ...
+        r_iT} from a single rollout of length T
 
-        Output: list where each index t contains sum_{t'=0}^T gamma^t' r_{t'}
+        Output: A 1D array where the i-th component contains sum_{t'=0}^T
+        gamma^t' r_{it'}
         """
 
-        return list_of_discounted_returns
+        # Compute the 2D array of exponentiated gammas
+        gamma_exponents = np.ones_like(rewards) * np.arange(rewards.shape[-1])
+        exponentiated_gamma = np.power(self.gamma, gamma_exponents)
 
-    def _discounted_cumsum(self, rewards):
+        # Multiply the rewards by the exponentiated gammas and sum them
+        discounted_rewards = rewards * exponentiated_gamma
+        summed_discounted_rewards = np.sum(discounted_rewards, axis=-1)
+
+        return summed_discounted_rewards
+
+    def _discounted_cumsum(self, rewards: NDArray) -> NDArray:
         """
         Helper function which
-        -takes a list of rewards {r_0, r_1, ..., r_t', ... r_T},
+        -takes 2D array of rewards {r_i0, r_i1, ..., r_it', ... r_iT},
         -and returns a list where the entry in each index t' is sum_{t'=t}^T gamma^(t'-t) * r_{t'}
         """
 
-        return list_of_discounted_cumsums
+        traj_len = rewards.shape[1]
+        num_traj = rewards.shape[0]
+
+        # Compute the 2D array of exponentiated gammas
+        gamma_exp_horiz = np.arange(traj_len).reshape(1, traj_len)
+        gamma_exp_vert = np.arange(traj_len).reshape(traj_len, 1)
+        gamma_exponents = gamma_exp_horiz - gamma_exp_vert
+        exponentiated_gamma = np.power(self.gamma, gamma_exponents)
+
+        # Create a 3D array consisting of 2D arrays with rows which look like
+        # {0, ..., 0, r_it', ..., r_iT} for 0 ≤ t' ≤ T
+        expanded_rewards = np.expand_dims(rewards, axis=1)
+        expanded_rewards = np.ones([num_traj, traj_len, traj_len]) * expanded_rewards
+        masked_expanded_rewards = np.triu(expanded_rewards)
+
+        # Multiply the masked rewards by the exponentiated gammas and sum
+        discounted_expanded_rewards = masked_expanded_rewards * exponentiated_gamma
+        summed_discounted_rewards = np.sum(discounted_expanded_rewards, axis=-1)
+
+        return summed_discounted_rewards
