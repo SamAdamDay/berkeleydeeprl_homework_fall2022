@@ -1,4 +1,5 @@
 import numpy as np
+from numpy.typing import NDArray
 import time
 import copy
 from typing import Tuple
@@ -14,7 +15,7 @@ from cs285.policies.base_policy import BasePolicy
 
 def calculate_mean_prediction_error(
     env: Env, action_sequence: list, models: list, data_statistics
-) -> tuple[np.Array, dict, np.NDArray]:
+) -> tuple[NDArray, dict, NDArray]:
     model = models[0]
 
     # true
@@ -178,7 +179,7 @@ def Path(
 
 def convert_listofrollouts(
     paths: "list[dict]",
-) -> Tuple[np.NDArray, np.NDArray, np.NDArray, np.NDArray, np.NDArray, np.NDArray]:
+) -> Tuple[NDArray, NDArray, NDArray, NDArray, NDArray, NDArray]:
     """
     Take a list of rollout dictionaries
     and return separate arrays,
@@ -216,7 +217,7 @@ def unnormalize(data: float, mean: float, std: float) -> float:
     return data * std + mean
 
 
-def add_noise(data_inp: np.NDArray, noiseToSignal: float = 0.01) -> np.NDArray:
+def add_noise(data_inp: NDArray, noiseToSignal: float = 0.01) -> NDArray:
     data = copy.deepcopy(data_inp)  # (num data points, dim)
 
     # mean of data

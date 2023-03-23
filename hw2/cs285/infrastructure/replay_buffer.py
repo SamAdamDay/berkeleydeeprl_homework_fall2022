@@ -1,3 +1,5 @@
+from numpy.typing import NDArray
+
 from cs285.infrastructure.utils import *
 
 
@@ -74,7 +76,7 @@ class ReplayBuffer(object):
 
     def sample_random_data(
         self, batch_size: int
-    ) -> Tuple[np.NDArray, np.NDArray, np.NDArray, np.NDArray, np.NDArray]:
+    ) -> Tuple[NDArray, NDArray, NDArray, NDArray, NDArray]:
         assert (
             self.obs.shape[0]
             == self.acs.shape[0]
@@ -93,7 +95,7 @@ class ReplayBuffer(object):
 
     def sample_recent_data(
         self, batch_size: int = 1, concat_rew: bool = True
-    ) -> Tuple[np.NDArray, np.NDArray, np.NDArray, np.NDArray, np.NDArray]:
+    ) -> Tuple[NDArray, NDArray, NDArray, NDArray, NDArray]:
         if concat_rew:
             return (
                 self.obs[-batch_size:],

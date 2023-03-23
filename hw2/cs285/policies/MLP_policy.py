@@ -1,11 +1,13 @@
 import abc
 import itertools
+from typing import Optional
+
+import numpy as np
+from numpy.typing import NDArray
+import torch
 from torch import nn
 from torch.nn import functional as F
 from torch import optim
-
-import numpy as np
-import torch
 from torch import distributions
 
 from cs285.infrastructure import pytorch_util as ptu
@@ -89,7 +91,7 @@ class MLPPolicy(BasePolicy, nn.Module, metaclass=abc.ABCMeta):
     ##################################
 
     # query the policy with observation(s) to get selected action(s)
-    def get_action(self, obs: np.NDArray) -> np.NDArray:
+    def get_action(self, obs: NDArray) -> NDArray:
         if len(obs.shape) > 1:
             observation = obs
         else:
@@ -143,10 +145,10 @@ class MLPPolicyPG(MLPPolicy):
 
     def update(
         self,
-        observations: np.NDArray,
-        actions: np.NDArray,
-        advantages: np.NDArray,
-        q_values=None,
+        observations: NDArray,
+        actions: NDArray,
+        advantages: NDArray,
+        q_values: Optional[NDArray]=None,
     ) -> dict:
         observations = ptu.from_numpy(observations)
         actions = ptu.from_numpy(actions)
@@ -176,7 +178,7 @@ class MLPPolicyPG(MLPPolicy):
         }
         return train_log
 
-    def run_baseline_prediction(self, observations: np.NDArray) -> np.NDArray:
+    def run_baseline_prediction(self, observations: NDArray) -> NDArray:
         """
         Helper function that converts `observations` to a tensor,
         calls the forward method of the baseline MLP,
