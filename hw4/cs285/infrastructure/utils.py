@@ -55,7 +55,8 @@ def mean_squared_error(a, b):
 ############################################
 
 def sample_trajectory(env, policy, max_path_length, render=False):
-# TODO: get this from previous HW
+    # TODO: get this from previous HW
+    pass
 
 def sample_trajectories(env, policy, min_timesteps_per_batch, max_path_length, render=False):
     """

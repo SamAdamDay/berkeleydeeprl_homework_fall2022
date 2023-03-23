@@ -73,12 +73,12 @@ class IQLAgent(DQNAgent):
         if self.t > self.num_exploration_steps:
             # TODO: After exploration is over, set the actor to optimize the extrinsic critic
             #HINT: Look at method ArgMaxPolicy.set_critic
+            pass
 
         if (self.t > self.learning_starts
                 and self.t % self.learning_freq == 0
                 and self.replay_buffer.can_sample(self.batch_size)
         ):
-
             # TODO: Get Reward Weights
             # Get the current explore reward weight and exploit reward weight
             explore_weight = None
