@@ -22,8 +22,7 @@ MAX_VIDEO_LEN = 40  # we overwrite this in the code below
 
 
 class RL_Trainer(object):
-    def __init__(self, params):
-
+    def __init__(self, params: dict):
         #############
         ## INIT
         #############
@@ -102,13 +101,13 @@ class RL_Trainer(object):
 
     def run_training_loop(
         self,
-        n_iter,
-        collect_policy,
-        eval_policy,
-        initial_expertdata=None,
-        relabel_with_expert=False,
-        start_relabel_with_expert=1,
-        expert_policy=None,
+        n_iter: int,
+        collect_policy: BasePolicy,
+        eval_policy: BasePolicy,
+        initial_expertdata: Optional[str] = None,
+        relabel_with_expert: bool = False,
+        start_relabel_with_expert: int = 1,
+        expert_policy: Optional[BasePolicy] = None,
     ):
         """
         :param n_iter:  number of (dagger) iterations
@@ -238,8 +237,14 @@ class RL_Trainer(object):
     ####################################
     ####################################
 
-    def perform_logging(self, itr, paths, eval_policy, train_video_paths, all_logs):
-
+    def perform_logging(
+        self,
+        itr: int,
+        paths: "list[dict]",
+        eval_policy: BasePolicy,
+        train_video_paths: "Optional[list[dict]]",
+        all_logs: list,
+    ):
         last_log = all_logs[-1]
 
         #######################

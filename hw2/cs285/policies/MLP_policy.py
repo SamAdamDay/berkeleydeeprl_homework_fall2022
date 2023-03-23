@@ -138,11 +138,16 @@ class MLPPolicy(BasePolicy, nn.Module, metaclass=abc.ABCMeta):
 
 class MLPPolicyPG(MLPPolicy):
     def __init__(self, ac_dim, ob_dim, n_layers, size, **kwargs):
-
         super().__init__(ac_dim, ob_dim, n_layers, size, **kwargs)
         self.baseline_loss = nn.MSELoss()
 
-    def update(self, observations, actions, advantages, q_values=None):
+    def update(
+        self,
+        observations: np.NDArray,
+        actions: np.NDArray,
+        advantages: np.NDArray,
+        q_values=None,
+    ) -> dict:
         observations = ptu.from_numpy(observations)
         actions = ptu.from_numpy(actions)
         advantages = ptu.from_numpy(advantages)
@@ -171,7 +176,7 @@ class MLPPolicyPG(MLPPolicy):
         }
         return train_log
 
-    def run_baseline_prediction(self, observations):
+    def run_baseline_prediction(self, observations: np.NDArray) -> np.NDArray:
         """
         Helper function that converts `observations` to a tensor,
         calls the forward method of the baseline MLP,

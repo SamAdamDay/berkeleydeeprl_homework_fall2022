@@ -1,13 +1,14 @@
 import gym
+from gym import Env
 import numpy as np
 
 
 class ActionNoiseWrapper(gym.ActionWrapper):
-    def __init__(self, env, seed, std):
+    def __init__(self, env: Env, seed: int, std: float):
         super().__init__(env)
         self.rng = np.random.default_rng(seed)
         self.std = std
 
-    def action(self, act):
+    def action(self, act: float) -> float:
         act = act + self.rng.normal(0, self.std, act.shape)
         return act

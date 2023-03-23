@@ -4,6 +4,7 @@ import copy
 from typing import Tuple
 
 from gym import Env
+from numpy.typing import ArrayLike
 
 from cs285.policies.base_policy import BasePolicy
 
@@ -11,8 +12,9 @@ from cs285.policies.base_policy import BasePolicy
 ############################################
 
 
-def calculate_mean_prediction_error(env, action_sequence, models, data_statistics):
-
+def calculate_mean_prediction_error(
+    env: Env, action_sequence: list, models: list, data_statistics
+) -> tuple[np.Array, dict, np.NDArray]:
     model = models[0]
 
     # true
@@ -33,7 +35,7 @@ def calculate_mean_prediction_error(env, action_sequence, models, data_statistic
     return mpe, true_states, pred_states
 
 
-def perform_actions(env, actions):
+def perform_actions(env: Env, actions: list) -> dict:
     ob = env.reset()
     obs, acs, rewards, next_obs, terminals, image_obs = [], [], [], [], [], []
     steps = 0
@@ -56,7 +58,7 @@ def perform_actions(env, actions):
     return Path(obs, image_obs, acs, rewards, next_obs, terminals)
 
 
-def mean_squared_error(a, b):
+def mean_squared_error(a: ArrayLike, b: ArrayLike) -> ArrayLike:
     return np.mean((a - b) ** 2)
 
 
@@ -150,7 +152,14 @@ def sample_n_trajectories(
 ############################################
 
 
-def Path(obs, image_obs, acs, rewards, next_obs, terminals):
+def Path(
+    obs: list,
+    image_obs: list,
+    acs: list,
+    rewards: list,
+    next_obs: list,
+    terminals: list,
+) -> dict:
     """
     Take info (separate arrays) from a single rollout
     and return it in a single dictionary
@@ -167,7 +176,9 @@ def Path(obs, image_obs, acs, rewards, next_obs, terminals):
     }
 
 
-def convert_listofrollouts(paths):
+def convert_listofrollouts(
+    paths: "list[dict]",
+) -> Tuple[np.NDArray, np.NDArray, np.NDArray, np.NDArray, np.NDArray, np.NDArray]:
     """
     Take a list of rollout dictionaries
     and return separate arrays,
@@ -193,20 +204,19 @@ def convert_listofrollouts(paths):
 ############################################
 
 
-def get_pathlength(path):
+def get_pathlength(path: dict) -> int:
     return len(path["reward"])
 
 
-def normalize(data, mean, std, eps=1e-8):
+def normalize(data: float, mean: float, std: float, eps: float = 1e-8) -> float:
     return (data - mean) / (std + eps)
 
 
-def unnormalize(data, mean, std):
+def unnormalize(data: float, mean: float, std: float) -> float:
     return data * std + mean
 
 
-def add_noise(data_inp, noiseToSignal=0.01):
-
+def add_noise(data_inp: np.NDArray, noiseToSignal: float = 0.01) -> np.NDArray:
     data = copy.deepcopy(data_inp)  # (num data points, dim)
 
     # mean of data

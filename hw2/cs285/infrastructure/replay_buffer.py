@@ -12,7 +12,7 @@ class ReplayBuffer(object):
         self.next_obs = None
         self.terminals = None
 
-    def add_rollouts(self, paths, noised=False):
+    def add_rollouts(self, paths: list, noised=False):
         # add new rollouts into our list of rollouts
         for path in paths:
             self.paths.append(path)
@@ -72,7 +72,9 @@ class ReplayBuffer(object):
     ########################################
     ########################################
 
-    def sample_random_data(self, batch_size):
+    def sample_random_data(
+        self, batch_size: int
+    ) -> Tuple[np.NDArray, np.NDArray, np.NDArray, np.NDArray, np.NDArray]:
         assert (
             self.obs.shape[0]
             == self.acs.shape[0]
@@ -89,7 +91,9 @@ class ReplayBuffer(object):
             self.terminals[rand_indices],
         )
 
-    def sample_recent_data(self, batch_size=1, concat_rew=True):
+    def sample_recent_data(
+        self, batch_size: int = 1, concat_rew: bool = True
+    ) -> Tuple[np.NDArray, np.NDArray, np.NDArray, np.NDArray, np.NDArray]:
         if concat_rew:
             return (
                 self.obs[-batch_size:],
