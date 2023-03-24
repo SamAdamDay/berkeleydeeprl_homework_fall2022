@@ -179,7 +179,7 @@ def Path(
 
 def convert_listofrollouts(
     paths: "list[dict]",
-) -> Tuple[NDArray, NDArray, NDArray, NDArray, NDArray, NDArray]:
+) -> Tuple[NDArray, NDArray, NDArray, NDArray, NDArray, "list[NDArray]"]:
     """
     Take a list of rollout dictionaries
     and return separate arrays,
@@ -209,11 +209,13 @@ def get_pathlength(path: dict) -> int:
     return len(path["reward"])
 
 
-def normalize(data: float, mean: float, std: float, eps: float = 1e-8) -> float:
+def normalize(
+    data: ArrayLike, mean: ArrayLike, std: ArrayLike, eps: float = 1e-8
+) -> ArrayLike:
     return (data - mean) / (std + eps)
 
 
-def unnormalize(data: float, mean: float, std: float) -> float:
+def unnormalize(data: ArrayLike, mean: ArrayLike, std: ArrayLike) -> ArrayLike:
     return data * std + mean
 
 

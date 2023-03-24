@@ -7,6 +7,7 @@ from gym import Env
 from .base_agent import BaseAgent
 from cs285.policies.MLP_policy import MLPPolicyPG
 from cs285.infrastructure.replay_buffer import ReplayBuffer
+import cs285.infrastructure.utils as utils
 
 
 class PGAgent(BaseAgent):
@@ -40,7 +41,7 @@ class PGAgent(BaseAgent):
         self,
         observations: NDArray,
         actions: NDArray,
-        rewards_list: NDArray,
+        rewards_list: "list[NDArray]",
         next_observations: NDArray,
         terminals: NDArray,
     ) -> dict:
@@ -59,12 +60,12 @@ class PGAgent(BaseAgent):
 
         return train_log
 
-    def calculate_q_vals(self, rewards_list: NDArray) -> NDArray:
+    def calculate_q_vals(self, rewards_list: "list[NDArray]") -> NDArray:
         """
         Monte Carlo estimation of the Q function.
         """
 
-        # TODO: return the estimated qvals based on the given rewards, using
+        # Return the estimated qvals based on the given rewards, using
         # either the full trajectory-based estimator or the reward-to-go
         # estimator
 
@@ -81,25 +82,36 @@ class PGAgent(BaseAgent):
         # trajectories and the second corresponds to timesteps,
         # then flattened to a 1D numpy array.
 
+        rewards_numpy = np.array(rewards_list)
+
         if not self.reward_to_go:
-            discounted_return = self._discounted_return(rewards_list)
+            q_values = self._discounted_return(rewards_numpy)
 
         # Case 2: reward-to-go PG
         # Estimate Q^{pi}(s_t, a_t) by the discounted sum of rewards starting from t
         else:
-            discounte_cumsum = self._discounted_cumsum(rewards_list)
+            q_values = self._discounted_cumsum(rewards_numpy)
+
+        q_values = q_values.flatten()
 
         return q_values
 
     def estimate_advantage(
         self,
         obs: NDArray,
-        rews_list: NDArray,
+        rews_list: "list[NDArray]",
         q_values: NDArray,
         terminals: NDArray,
     ) -> NDArray:
         """
         Computes advantages by (possibly) using GAE, or subtracting a baseline from the estimated Q values
+
+        Parameters
+        ----------
+        obs : 1D array
+        rews_list : list of 1D arrays
+        q_values : 1D array
+        terminals : 1D array
         """
 
         # Estimate the advantage when nn_baseline is True, by querying the
@@ -109,10 +121,13 @@ class PGAgent(BaseAgent):
             ## ensure that the value predictions and q_values have the same dimensionality
             ## to prevent silent broadcasting errors
             assert values_unnormalized.ndim == q_values.ndim
-            ## TODO: values were trained with standardized q_values, so ensure
+            ## Values were trained with standardized q_values, so ensure
             ## that the predictions have the same mean and standard deviation as
             ## the current batch of q_values
-            values = TODO
+            q_values_mean, q_values_std = np.mean(q_values), np.std(q_values)
+            values_mean, values_std = np.mean(values), np.std(values)
+            values_normalized = utils.normalize(values, values_mean, values_std)
+            values = utils.unnormalize(values_normalized, q_values_mean, q_values_std)
 
             if self.gae_lambda is not None:
                 ## append a dummy T+1 value for simpler recursive calculation
@@ -126,20 +141,26 @@ class PGAgent(BaseAgent):
                 batch_size = obs.shape[0]
                 advantages = np.zeros(batch_size + 1)
 
-                for i in reversed(range(batch_size)):
-                    ## TODO: recursively compute advantage estimates starting from
+                for i in range(batch_size - 1, -1, -1):
+                    ## Recursively compute advantage estimates starting from
                     ## timestep T.
                     ## HINT: use terminals to handle edge cases. terminals[i]
                     ## is 1 if the state is the last in its trajectory, and
                     ## 0 otherwise.
-                    pass
+                    if terminals[i]:
+                        advantages[i] = rews[i] - values[i]
+                    else:
+                        delta = rews[i] + self.gamma * values[i + 1] - values[i]
+                        advantages[i] = (
+                            delta + self.gamma * self.gae_lambda * advantages[i + 1]
+                        )
 
                 # remove dummy advantage
                 advantages = advantages[:-1]
 
             else:
-                ## TODO: compute advantage estimates using q_values, and values as baselines
-                advantages = TODO
+                ## Compute advantage estimates using q_values, and values as baselines
+                advantages = q_values - values
 
         # Else, just set the advantage to [Q]
         else:
@@ -148,7 +169,8 @@ class PGAgent(BaseAgent):
         # Normalize the resulting advantages to have a mean of zero
         # and a standard deviation of one
         if self.standardize_advantages:
-            advantages = TODO
+            advantages_mean, advantages_std = np.mean(advantages), np.std(advantages)
+            advantages = utils.normalize(advantages, advantages_mean, advantages_std)
 
         return advantages
 
@@ -174,8 +196,8 @@ class PGAgent(BaseAgent):
         Input: An 2D array where each row is {r_i0, r_i1, ..., r_it', ...
         r_iT} from a single rollout of length T
 
-        Output: A 1D array where the i-th component contains sum_{t'=0}^T
-        gamma^t' r_{it'}
+        Output: A 2D array where the i-th row contains the following value
+        repeated: sum_{t'=0}^T gamma^t' r_{it'}
         """
 
         # Compute the 2D array of exponentiated gammas
@@ -184,7 +206,8 @@ class PGAgent(BaseAgent):
 
         # Multiply the rewards by the exponentiated gammas and sum them
         discounted_rewards = rewards * exponentiated_gamma
-        summed_discounted_rewards = np.sum(discounted_rewards, axis=-1)
+        summed_discounted_rewards = np.sum(discounted_rewards, axis=-1, keepdims=True)
+        summed_discounted_rewards = summed_discounted_rewards * np.ones_like(rewards)
 
         return summed_discounted_rewards
 
