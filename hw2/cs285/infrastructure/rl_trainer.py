@@ -145,7 +145,7 @@ class RL_Trainer(object):
 
             # collect trajectories, to be used for training
             training_returns = self.collect_training_trajectories(
-                itr, initial_expertdata, collect_policy, self.params["batch_size"]
+                itr, collect_policy, self.params["batch_size"], initial_expertdata
             )
             paths, envsteps_this_batch, train_video_paths = training_returns
             self.total_envsteps += envsteps_this_batch
@@ -175,9 +175,9 @@ class RL_Trainer(object):
     def collect_training_trajectories(
         self,
         itr: int,
-        load_initial_expertdata: str,
         collect_policy: BasePolicy,
         batch_size: int,
+        load_initial_expertdata: Optional[str] = None,
     ) -> Tuple["list[dict]", int, Optional["list[dict]"]]:
         """
         :param itr:
@@ -190,8 +190,8 @@ class RL_Trainer(object):
             train_video_paths: paths which also contain videos for visualization purposes
         """
 
-        # On the first iteration just load the expert data
-        if itr == 0:
+        # On the first iteration just load the expert data, if we have it
+        if itr == 0 and load_initial_expertdata is not None:
             print("\nLoading expert data for training...")
             with open(load_initial_expertdata, "rb") as f:
                 loaded_paths = pickle.load(f)
