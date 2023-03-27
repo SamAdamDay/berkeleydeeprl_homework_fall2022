@@ -155,7 +155,7 @@ class MLPPolicyPG(MLPPolicy):
         advantages = ptu.from_numpy(advantages)
         q_values = ptu.from_numpy(q_values)
 
-        # TODO: update the policy using policy gradient
+        # Update the policy using policy gradient
         # HINT1: Recall that the expression that we want to MAXIMIZE
         # is the expectation over collected trajectories of:
         # sum_{t=0}^{T-1} [grad [log pi(a_t|s_t) * (Q_t - b_t)]]
@@ -169,12 +169,12 @@ class MLPPolicyPG(MLPPolicy):
         utility = action_distribution.log_prob(actions)
 
         if self.nn_baseline:
-            # Disable gradient calucation for the baseline while we're
+            # Disable gradient calculation for the baseline while we're
             # updating the policy
             self.baseline.requires_grad_(False)
 
             # Compute the baseline values
-            baseline_values = self.baseline.forward(q_values)
+            baseline_values = self.baseline.forward(observations)
 
             # Multiply the log-prob elementwise
             utility = utility * (q_values - baseline_values)
@@ -199,17 +199,28 @@ class MLPPolicyPG(MLPPolicy):
         }
 
         if self.nn_baseline:
-            ## TODO: update the neural network baseline using the q_values as
+            ## Update the neural network baseline using the q_values as
             ## targets. The q_values should first be normalized to have a mean
             ## of zero and a standard deviation of one.
 
-            ## Note: You will need to convert the targets into a tensor using
-            ## ptu.from_numpy before using it in the loss
-
             # Normalise the Q values
             std, mean = torch.std_mean(q_values)
-            q_values = (q_values - mean) / (std + 1e-8)
-            
+            q_values_normalized = (q_values - mean) / (std + 1e-8)
+
+            # We now want to compute the gradients
+            self.baseline.requires_grad_(True)
+
+            # Compute the loss
+            baseline_values = self.baseline.forward(observations)
+            baseline_loss = F.mse_loss(baseline_values, q_values_normalized)
+
+            # Backpropagation
+            self.baseline_optimizer.zero_grad()
+            baseline_loss.backward()
+            self.baseline_optimizer.step()
+
+            train_log["Baseline Training Loss"] = ptu.to_numpy(baseline_loss)
+
         return train_log
 
     def run_baseline_prediction(self, observations: NDArray) -> NDArray:

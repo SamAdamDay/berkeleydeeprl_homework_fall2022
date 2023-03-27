@@ -108,10 +108,10 @@ class PGAgent(BaseAgent):
 
         Parameters
         ----------
-        obs : 1D array
-        rews_list : list of 1D arrays
-        q_values : 1D array
-        terminals : 1D array
+        obs : 2D array, a concatenation of all rollouts
+        rews_list : list of 1D arrays, grouped by rollout
+        q_values : 1D array, a concatenation of all rollouts
+        terminals : 1D array, a concatenation of all rollouts
         """
 
         # Estimate the advantage when nn_baseline is True, by querying the
