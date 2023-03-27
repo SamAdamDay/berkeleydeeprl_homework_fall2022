@@ -1,3 +1,5 @@
+from typing import Union
+
 from numpy.typing import NDArray
 
 from cs285.infrastructure.utils import *
@@ -64,11 +66,11 @@ class ReplayBuffer(object):
     ########################################
     ########################################
 
-    def sample_random_rollouts(self, num_rollouts):
+    def sample_random_rollouts(self, num_rollouts) -> list:
         rand_indices = np.random.permutation(len(self.paths))[:num_rollouts]
         return self.paths[rand_indices]
 
-    def sample_recent_rollouts(self, num_rollouts=1):
+    def sample_recent_rollouts(self, num_rollouts=1) -> list:
         return self.paths[-num_rollouts:]
 
     ########################################
@@ -95,7 +97,7 @@ class ReplayBuffer(object):
 
     def sample_recent_data(
         self, batch_size: int = 1, concat_rew: bool = True
-    ) -> Tuple[NDArray, NDArray, NDArray, NDArray, NDArray]:
+    ) -> Tuple[NDArray, NDArray, Union[NDArray, "list[NDArray]"], NDArray, NDArray]:
         if concat_rew:
             return (
                 self.obs[-batch_size:],

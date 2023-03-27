@@ -147,7 +147,7 @@ class PGAgent(BaseAgent):
                     ## HINT: use terminals to handle edge cases. terminals[i]
                     ## is 1 if the state is the last in its trajectory, and
                     ## 0 otherwise.
-                    if terminals[i]:
+                    if terminals[i] == 1:
                         advantages[i] = rews[i] - values[i]
                     else:
                         delta = rews[i] + self.gamma * values[i + 1] - values[i]
@@ -182,7 +182,7 @@ class PGAgent(BaseAgent):
 
     def sample(
         self, batch_size: int
-    ) -> Tuple[NDArray, NDArray, NDArray, NDArray, NDArray]:
+    ) -> Tuple[NDArray, NDArray, list[NDArray], NDArray, NDArray]:
         return self.replay_buffer.sample_recent_data(batch_size, concat_rew=False)
 
     #####################################################

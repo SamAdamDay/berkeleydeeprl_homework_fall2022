@@ -117,7 +117,7 @@ class MLPPolicy(BasePolicy, nn.Module, metaclass=abc.ABCMeta):
     # through it. For example, you can return a torch.FloatTensor. You can also
     # return more flexible objects, such as a
     # `torch.distributions.Distribution` object. It's up to you!
-    def forward(self, observation: torch.FloatTensor):
+    def forward(self, observation: torch.FloatTensor) -> distributions.Distribution:
         if self.discrete:
             logits = self.logits_na(observation)
             action_distribution = distributions.Categorical(logits=logits)
@@ -148,11 +148,12 @@ class MLPPolicyPG(MLPPolicy):
         observations: NDArray,
         actions: NDArray,
         advantages: NDArray,
-        q_values: Optional[NDArray]=None,
+        q_values: NDArray,
     ) -> dict:
         observations = ptu.from_numpy(observations)
         actions = ptu.from_numpy(actions)
         advantages = ptu.from_numpy(advantages)
+        q_values = ptu.from_numpy(q_values)
 
         # TODO: update the policy using policy gradient
         # HINT1: Recall that the expression that we want to MAXIMIZE
@@ -161,7 +162,41 @@ class MLPPolicyPG(MLPPolicy):
         # HINT2: you will want to use the `log_prob` method on the distribution returned
         # by the `forward` method
 
-        TODO
+        # Build the probability distribution over actions
+        action_distribution = self.forward(observations)
+
+        # The log-prob part of the utility
+        utility = action_distribution.log_prob(actions)
+
+        if self.nn_baseline:
+            # Disable gradient calucation for the baseline while we're
+            # updating the policy
+            self.baseline.requires_grad_(False)
+
+            # Compute the baseline values
+            baseline_values = self.baseline.forward(q_values)
+
+            # Multiply the log-prob elementwise
+            utility = utility * (q_values - baseline_values)
+
+        else:
+            # Multiply the log-prob elementwise
+            utility = utility * q_values
+
+        # Sum everything up to get the final utility value
+        utility = torch.sum(utility)
+
+        # We do gradient descengt, so we need to take the negative
+        loss = -utility
+
+        # Backpropagation
+        self.optimizer.zero_grad()
+        loss.backward()
+        self.optimizer.step()
+
+        train_log = {
+            "Training Loss": ptu.to_numpy(loss),
+        }
 
         if self.nn_baseline:
             ## TODO: update the neural network baseline using the q_values as
@@ -171,11 +206,10 @@ class MLPPolicyPG(MLPPolicy):
             ## Note: You will need to convert the targets into a tensor using
             ## ptu.from_numpy before using it in the loss
 
-            TODO
-
-        train_log = {
-            "Training Loss": ptu.to_numpy(loss),
-        }
+            # Normalise the Q values
+            std, mean = torch.std_mean(q_values)
+            q_values = (q_values - mean) / (std + 1e-8)
+            
         return train_log
 
     def run_baseline_prediction(self, observations: NDArray) -> NDArray:
