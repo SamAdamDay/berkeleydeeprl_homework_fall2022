@@ -165,25 +165,8 @@ class MLPPolicyPG(MLPPolicy):
         # Build the probability distribution over actions
         action_distribution = self.forward(observations)
 
-        # The log-prob part of the utility
-        utility = action_distribution.log_prob(actions)
-
-        if self.nn_baseline:
-            # Disable gradient calculation for the baseline while we're
-            # updating the policy
-            self.baseline.requires_grad_(False)
-
-            # Compute the baseline values
-            baseline_values = self.baseline.forward(observations)
-
-            # Multiply the log-prob elementwise
-            utility = utility * (q_values - baseline_values)
-
-        else:
-            # Multiply the log-prob elementwise
-            utility = utility * q_values
-
-        # Sum everything up to get the final utility value
+        # Compute the utility using the log prob and the advantages
+        utility = action_distribution.log_prob(actions) * advantages
         utility = torch.sum(utility)
 
         # We do gradient descengt, so we need to take the negative
