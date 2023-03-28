@@ -17,7 +17,7 @@ EXPERIMENTS = {
         "colour": 1,
     },
     "q1_sb_rtg_na": {
-        "label": "Reward-to-go, standardised advantages",
+        "label": "Reward-to-go, standardised",
         "graph": "small_batch",
         "colour": 2,
     },
@@ -28,7 +28,7 @@ EXPERIMENTS = {
         "colour": 1,
     },
     "q1_lb_rtg_na": {
-        "label": "Reward-to-go, standardised advantages",
+        "label": "Reward-to-go, standardised",
         "graph": "large_batch",
         "colour": 2,
     },
@@ -83,7 +83,7 @@ for graph_name, graph_specs in GRAPHS.items():
 
     print(f"Graph {graph_name!r}...")
 
-    fig, ax = plt.subplots(1, 1)
+    fig, ax = plt.subplots(1, 1, figsize=(15, 10))
 
     for exp_name, exp_specs in EXPERIMENTS.items():
 
