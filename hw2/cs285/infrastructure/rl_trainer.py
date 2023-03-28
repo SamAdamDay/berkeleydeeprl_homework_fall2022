@@ -206,7 +206,7 @@ class RL_Trainer(object):
         # collect more rollouts with the same policy, to be saved as videos in tensorboard
         # note: here, we collect MAX_NVIDEO rollouts, each of length MAX_VIDEO_LEN
         train_video_paths = None
-        if self.log_video:
+        if self.logvideo:
             print("\nCollecting train rollouts to be used for saving videos...")
             train_video_paths = utils.sample_n_trajectories(
                 self.env, collect_policy, MAX_NVIDEO, MAX_VIDEO_LEN, True
