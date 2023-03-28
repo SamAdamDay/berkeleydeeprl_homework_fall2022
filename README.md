@@ -6,6 +6,14 @@ My solutions for the assignments for [Berkeley CS 285: Deep Reinforcement Learni
 I develop and run things using [vast.ai](https://vast.ai/). For this I've built a handy Docker image (see below).
 
 
+Reports
+-------
+
+I have produced the following reports for the homework exercises.
+
+- [Homework 2 report](hw2/report/hw2_report.md)
+
+
 Using Docker
 ------------
 
