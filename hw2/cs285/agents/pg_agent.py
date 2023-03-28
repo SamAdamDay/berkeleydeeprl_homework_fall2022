@@ -82,17 +82,15 @@ class PGAgent(BaseAgent):
         # trajectories and the second corresponds to timesteps,
         # then flattened to a 1D numpy array.
 
-        rewards_numpy = np.array(rewards_list)
-
         if not self.reward_to_go:
-            q_values = self._discounted_return(rewards_numpy)
+            q_values_iter = map(self._discounted_return, rewards_list)
 
         # Case 2: reward-to-go PG
         # Estimate Q^{pi}(s_t, a_t) by the discounted sum of rewards starting from t
         else:
-            q_values = self._discounted_cumsum(rewards_numpy)
+            q_values_iter = map(self._discounted_cumsum, rewards_list)
 
-        q_values = q_values.flatten()
+        q_values = np.concatenate(list(q_values_iter))
 
         return q_values
 
@@ -193,20 +191,19 @@ class PGAgent(BaseAgent):
         """
         Helper function
 
-        Input: An 2D array where each row is {r_i0, r_i1, ..., r_it', ...
-        r_iT} from a single rollout of length T
+        Input: An array of rewards {r_0, r_1, ..., r_t', ... r_T} from a
+        single rollout
 
-        Output: A 2D array where the i-th row contains the following value
-        repeated: sum_{t'=0}^T gamma^t' r_{it'}
+        Output: An array full of sum_{t'=0}^T gamma^t' r_{t'} repeated
         """
 
         # Compute the 2D array of exponentiated gammas
-        gamma_exponents = np.ones_like(rewards) * np.arange(rewards.shape[-1])
+        gamma_exponents = np.arange(rewards.shape[0])
         exponentiated_gamma = np.power(self.gamma, gamma_exponents)
 
         # Multiply the rewards by the exponentiated gammas and sum them
         discounted_rewards = rewards * exponentiated_gamma
-        summed_discounted_rewards = np.sum(discounted_rewards, axis=-1, keepdims=True)
+        summed_discounted_rewards = np.sum(discounted_rewards)
         summed_discounted_rewards = summed_discounted_rewards * np.ones_like(rewards)
 
         return summed_discounted_rewards
@@ -214,12 +211,11 @@ class PGAgent(BaseAgent):
     def _discounted_cumsum(self, rewards: NDArray) -> NDArray:
         """
         Helper function which
-        -takes 2D array of rewards {r_i0, r_i1, ..., r_it', ... r_iT},
-        -and returns a list where the entry in each index t' is sum_{t'=t}^T gamma^(t'-t) * r_{t'}
+        -takes array of rewards {r_0, r_1, ..., r_t', ... r_T},
+        -and returns an array where the entry in each index t' is sum_{t'=t}^T gamma^(t'-t) * r_{t'}
         """
 
-        traj_len = rewards.shape[1]
-        num_traj = rewards.shape[0]
+        traj_len = rewards.shape[0]
 
         # Compute the 2D array of exponentiated gammas
         gamma_exp_horiz = np.arange(traj_len).reshape(1, traj_len)
@@ -227,14 +223,13 @@ class PGAgent(BaseAgent):
         gamma_exponents = gamma_exp_horiz - gamma_exp_vert
         exponentiated_gamma = np.power(self.gamma, gamma_exponents)
 
-        # Create a 3D array consisting of 2D arrays with rows which look like
+        # Create a 2D array with rows which look like
         # {0, ..., 0, r_it', ..., r_iT} for 0 ≤ t' ≤ T
-        expanded_rewards = np.expand_dims(rewards, axis=1)
-        expanded_rewards = np.ones([num_traj, traj_len, traj_len]) * expanded_rewards
+        expanded_rewards = np.ones((traj_len, traj_len)) * rewards
         masked_expanded_rewards = np.triu(expanded_rewards)
 
         # Multiply the masked rewards by the exponentiated gammas and sum
         discounted_expanded_rewards = masked_expanded_rewards * exponentiated_gamma
-        summed_discounted_rewards = np.sum(discounted_expanded_rewards, axis=-1)
+        summed_discounted_rewards = np.sum(discounted_expanded_rewards, axis=1)
 
         return summed_discounted_rewards
