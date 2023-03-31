@@ -7,11 +7,11 @@ The figures below show the average eval return through 100 iterations for batch 
 2. Policy gradient using reward-to-go.
 3. Policy gradient using reward-to-go where we also standardise the advantages before computing the gradient.
 
-| ![Learning curve for small batches](images/q2_small_batch.png) |
+| ![Learning curve for small batches](images/q1_small_batch.png) |
 |:--:| 
 | *Learning curve for small batches* |
 
-| ![Learning curve for large batches](images/q2_large_batch.png) |
+| ![Learning curve for large batches](images/q1_large_batch.png) |
 |:--:| 
 | *Learning curve for large batches* |
 
