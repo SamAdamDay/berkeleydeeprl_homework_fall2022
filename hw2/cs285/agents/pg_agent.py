@@ -123,8 +123,11 @@ class PGAgent(BaseAgent):
             ## that the predictions have the same mean and standard deviation as
             ## the current batch of q_values
             q_values_mean, q_values_std = np.mean(q_values), np.std(q_values)
-            values_mean, values_std = np.mean(values), np.std(values)
-            values_normalized = utils.normalize(values, values_mean, values_std)
+            values_mean = np.mean(values_unnormalized)
+            values_std = np.std(values_unnormalized)
+            values_normalized = utils.normalize(
+                values_unnormalized, values_mean, values_std
+            )
             values = utils.unnormalize(values_normalized, q_values_mean, q_values_std)
 
             if self.gae_lambda is not None:
