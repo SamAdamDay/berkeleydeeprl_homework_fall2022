@@ -19,7 +19,7 @@ OPTIMIUM_PROP_THRESHOLD = 0.1
 COLOURMAP = "viridis"
 GRAPH_TITLE = (
     "Average proportion of training curves which where the eval return "
-    "is optimal, for different learning rates and batch sizes"
+    "is optimal, for different learning rates and batch sizes, thresholding at 0.1"
 )
 
 print("Loading log data...")
