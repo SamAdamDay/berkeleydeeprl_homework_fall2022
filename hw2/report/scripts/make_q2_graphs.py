@@ -8,6 +8,8 @@ import matplotlib as mpl
 
 from tensorboard.backend.event_processing.event_accumulator import EventAccumulator
 
+from tqdm import tqdm
+
 SCRIPT_PATH = os.path.realpath(__file__)
 DATA_DIR = os.path.normpath(SCRIPT_PATH + "/../../../data")
 
@@ -26,7 +28,7 @@ print("Loading log data...")
 # keys `seed` and values 'Eval_AverageReturn' curves
 experiment_logs = {}
 
-for filename in os.listdir(DATA_DIR):
+for filename in tqdm(os.listdir(DATA_DIR)):
     filepath = os.path.join(DATA_DIR, filename)
 
     regex_match = EXPERIMENT_REGEX.match(filename)
@@ -35,12 +37,9 @@ for filename in os.listdir(DATA_DIR):
     if regex_match is None or not os.path.isdir(filepath):
         continue
 
-    name = regex_match.group(1)
     lr = float(regex_match.group(2))
     batch_size = int(regex_match.group(3))
     seed = int(regex_match.group(4))
-
-    print(f"Experiment {name!r} (lr:{lr}, batch_size: {batch_size}, seed: {seed})...")
 
     # Load the logs
     if (lr, batch_size) not in experiment_logs:
