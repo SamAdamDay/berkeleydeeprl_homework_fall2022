@@ -11,7 +11,7 @@ LR_VALUES = [0.005, 0.01, 0.02]
 BATCH_SIZE_VALUES = [10000, 30000, 50000]
 
 TIMEOUT = 0
-MAX_CONCURRENT = 3
+MAX_CONCURRENT = 10
 
 
 def get_experiment_progress(output_string: str) -> "int | None":
