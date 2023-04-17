@@ -100,7 +100,11 @@ class ParallelProcesses:
     """
 
     def __init__(
-        self, process_commands: list, max_concurrent: int, timeout: float, get_child_progress: callable
+        self,
+        process_commands: list,
+        max_concurrent: int,
+        timeout: float,
+        get_child_progress: callable,
     ):
         self.max_concurrent = max_concurrent
         self.timeout = timeout
@@ -145,8 +149,6 @@ class ParallelProcesses:
             # Check if there's something to read
             read_list = self.selector.select(timeout=self.timeout)
 
-            print(len(read_list))
-
             for selector_key, events in read_list:
                 # Get the latest line of output
                 child = selector_key.data
@@ -175,4 +177,3 @@ class ParallelProcesses:
         # Refresh all the bars, because adding a new one can mess things up
         for child in self.children:
             child.refresh()
-            

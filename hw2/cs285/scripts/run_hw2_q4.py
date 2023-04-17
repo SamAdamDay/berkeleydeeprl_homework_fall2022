@@ -9,14 +9,12 @@ RUN_SCRIPT_PATH = os.path.join(os.path.dirname(SCRIPT_PATH), "run_hw2.py")
 
 LR_VALUES = [0.005, 0.01, 0.02]
 BATCH_SIZE_VALUES = [10000, 30000, 50000]
-BATCH_SIZE_VALUES = [10, 30, 50]
 
-TIMEOUT = 0.1
+TIMEOUT = 0
 MAX_CONCURRENT = 3
 
 
 def get_experiment_progress(output_string: str) -> int | None:
-    print(output_string)
     matches = re.findall(r"\*{10} Iteration ([0-9]+) \*{10}", output_string)
     if len(matches) == 0:
         return None
