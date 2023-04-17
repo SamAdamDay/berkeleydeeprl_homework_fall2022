@@ -194,7 +194,7 @@ class MLPPolicyPG(MLPPolicy):
             self.baseline.requires_grad_(True)
 
             # Compute the loss
-            baseline_values = self.baseline.forward(observations)
+            baseline_values = self.baseline.forward(observations).squeeze()
             baseline_loss = F.mse_loss(baseline_values, q_values_normalized)
 
             # Backpropagation
