@@ -37,3 +37,12 @@ The figures below show the average proportion the training run which on which we
 Conclusions:
 - The best set of parameters from those tested is a learning rate of 0.01 and a batch size of 3000.
 - The highest learning rate and lowest batch size which gets above the 0.1 threshold is either (0.08, 900) or (0.09, 4000).
+
+
+## Question 3
+
+The following shows the training curve for the `LunarLanderContinuous-v2` environment when using a neural network baseline. It attains an average return of around 180 by the end of training.
+
+| ![Training curve for LunarLanderContinuous-v2 using a neural network baseline](images/q3.png) |
+|:--:| 
+| *Training curve for LunarLanderContinuous-v2 using a neural network baseline* |
