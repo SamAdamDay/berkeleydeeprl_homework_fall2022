@@ -183,7 +183,7 @@ class PGAgent(BaseAgent):
 
     def sample(
         self, batch_size: int
-    ) -> Tuple[NDArray, NDArray, list[NDArray], NDArray, NDArray]:
+    ) -> Tuple[NDArray, NDArray, "list[NDArray]", NDArray, NDArray]:
         return self.replay_buffer.sample_recent_data(batch_size, concat_rew=False)
 
     #####################################################

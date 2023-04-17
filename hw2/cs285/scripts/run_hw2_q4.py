@@ -14,7 +14,7 @@ TIMEOUT = 0
 MAX_CONCURRENT = 3
 
 
-def get_experiment_progress(output_string: str) -> int | None:
+def get_experiment_progress(output_string: str) -> "int | None":
     matches = re.findall(r"\*{10} Iteration ([0-9]+) \*{10}", output_string)
     if len(matches) == 0:
         return None

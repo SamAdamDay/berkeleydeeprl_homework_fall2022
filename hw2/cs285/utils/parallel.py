@@ -111,7 +111,7 @@ class ParallelProcesses:
         self.get_child_progress = get_child_progress
 
         self.process_command_iter = iter(process_commands)
-        self.children: list[ParallelProcessChild] = []
+        self.children: "list[ParallelProcessChild]" = []
         self.selector = DefaultSelector()
 
     def run(self):

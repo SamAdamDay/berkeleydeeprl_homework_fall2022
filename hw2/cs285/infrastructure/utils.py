@@ -15,7 +15,7 @@ from cs285.policies.base_policy import BasePolicy
 
 def calculate_mean_prediction_error(
     env: Env, action_sequence: list, models: list, data_statistics
-) -> tuple[NDArray, dict, NDArray]:
+) -> Tuple[NDArray, dict, NDArray]:
     model = models[0]
 
     # true
