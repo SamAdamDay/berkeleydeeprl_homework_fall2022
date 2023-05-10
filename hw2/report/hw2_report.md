@@ -1,6 +1,6 @@
 # Homework 2 Report
 
-## Question 1
+## Experiment 1
 
 The figures below show the average eval return through 100 iterations for batch sizes 1000 and 5000 across three variations of policy gradient:
 1. Basic policy gradient, which at every timestep uses the sum of the rewards over all timesteps.
@@ -22,7 +22,7 @@ Conclusions:
 - Using the larger batch size of 5000 improves performance considerably. The training converges faster and is more stable. All variations converge to the optimum return by 100 iterations.
 
 
-## Question 2
+## Experiment 2
 
 The figures below show the average proportion the training run which on which we receive the optimal return, for different learning rates and batch sizes, which the average taken across four random seeds. The second figure differs from the first in that we replace all points whose average proportion is less than 0.1 by an empty circle. 
 
@@ -39,7 +39,7 @@ Conclusions:
 - The highest learning rate and lowest batch size which gets above the 0.1 threshold is either (0.08, 900) or (0.09, 4000).
 
 
-## Question 3
+## Experiment 3
 
 The following shows the training curve for the `LunarLanderContinuous-v2` environment when using a neural network baseline. It attains an average return of around 180 by the end of training.
 
@@ -48,7 +48,7 @@ The following shows the training curve for the `LunarLanderContinuous-v2` enviro
 | *Training curve for LunarLanderContinuous-v2 using a neural network baseline* |
 
 
-## Question 4
+## Experiment 4
 
 I now try `HalfCheetah-v4` using the neural network baseline, testing various learning rates and batch sizes.
 
