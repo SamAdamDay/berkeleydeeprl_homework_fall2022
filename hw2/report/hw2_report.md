@@ -46,3 +46,14 @@ The following shows the training curve for the `LunarLanderContinuous-v2` enviro
 | ![Training curve for LunarLanderContinuous-v2 using a neural network baseline](images/q3.png) |
 |:--:| 
 | *Training curve for LunarLanderContinuous-v2 using a neural network baseline* |
+
+
+## Question 4
+
+I now try `HalfCheetah-v4` using the neural network baseline, testing various learning rates and batch sizes.
+
+| ![Training curve for HalfCheetah-v4 using a neural network baseline](images/q4_part1.png) |
+|:--:| 
+| *Training curve for HalfCheetah-v4 using a neural network baseline* |
+
+Higher learning rates consistently yield better results. For the learning rates `0.005` and `0.01` larger batch sizes give better results. For `0.02` however the best batch size is `30000` (though this has higher variance and doesn't perform as well as `50000` initially).
