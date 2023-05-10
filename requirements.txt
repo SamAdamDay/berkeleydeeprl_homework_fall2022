@@ -1,4 +1,4 @@
-mujoco==2.2.0
+mujoco==2.3.5
 gym==0.25.2
 tensorboard==2.10.0
 tensorboardX==2.5.1
