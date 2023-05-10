@@ -1,5 +1,6 @@
 import os
 import re
+from collections import OrderedDict
 
 import numpy as np
 
@@ -10,16 +11,22 @@ from tensorboard.backend.event_processing.event_accumulator import EventAccumula
 
 SCRIPT_PATH = os.path.realpath(__file__)
 DATA_DIR = os.path.normpath(SCRIPT_PATH + "/../../../data")
-EXPERIMENT_NAME_REGEX = re.compile(r"(q4_lr([0-9.]+)_bs([0-9]+))_HalfCheetah-v4")
-GRAPH_TITLE = "Training curve for HalfCheetah-v4 using a neural network baseline"
-COLOURMAP = "tab20c"
+EXPERIMENT_NAME_REGEX = re.compile(r"q4_2_lr[0-9.]+_bs[0-9]+([_a-z]*)_HalfCheetah-v4")
+TAG_TO_LABEL = OrderedDict(
+    [
+        ("", "Standard"),
+        ("_nnbaseline", "NN baseline"),
+        ("_rtg", "Reward-to-go"),
+        ("_rtg_nnbaseline", "Reward-to-go, NN baseline"),
+    ]
+)
+GRAPH_TITLE = "Training curve for HalfCheetah-v4 using different addons"
+COLOURMAP = "Set1"
 
 print("Loading log data...")
 
-# A list of elements `(lr, batch_size, Eval_AverageReturn)`
+# A list of elements `(tag, Eval_AverageReturn)`
 experiment_logs = []
-lrs = set()
-batch_sizes = set()
 
 for filename in os.listdir(DATA_DIR):
     filepath = os.path.join(DATA_DIR, filename)
@@ -30,11 +37,7 @@ for filename in os.listdir(DATA_DIR):
     if not regex_match or not os.path.isdir(filepath):
         continue
 
-    lr = float(regex_match.group(2))
-    batch_size = int(regex_match.group(3))
-
-    lrs.add(lr)
-    batch_sizes.add(batch_size)
+    tag = regex_match.group(1)
 
     # Load the logs
     event_acc = EventAccumulator(filepath)
@@ -44,14 +47,10 @@ for filename in os.listdir(DATA_DIR):
     for i, event in enumerate(event_list):
         assert i == event.step
         curve.append(event.value)
-    experiment_logs.append((lr, batch_size, np.array(curve)))
+    experiment_logs.append((tag, np.array(curve)))
 
-# Sort the logs lexicographically
-experiment_logs.sort(key=lambda t: f"{t[0]:.3f}:{t[1]}")
-
-# Get the learning rates and batch sizes as sorted lists
-lrs = sorted(lrs)
-batch_sizes = sorted(batch_sizes)
+# Sort the logs according to `TAG_TO_LABEL`
+experiment_logs.sort(key=lambda t: list(TAG_TO_LABEL.keys()).index(t[0]))
 
 print("Plotting graph...")
 
@@ -59,11 +58,10 @@ cmap = mpl.colormaps[COLOURMAP]
 
 fig, ax = plt.subplots(1, 1, figsize=(15, 10))
 
-for lr, batch_size, avg_return in experiment_logs:
-    colour_index = 4 * lrs.index(lr) + batch_sizes.index(batch_size)
-    label = f"LR: {lr}, Batch: {batch_size}"
+for i, (tag, avg_return) in enumerate(experiment_logs):
+    label = TAG_TO_LABEL[tag]
     x_values = np.arange(avg_return.shape[0])
-    ax.plot(x_values, avg_return, color=cmap(colour_index), label=label)
+    ax.plot(x_values, avg_return, color=cmap(i), label=label)
     ax.set(xlabel="Iteration", ylabel="Return", title=GRAPH_TITLE)
 
 fig.legend()
