@@ -11,21 +11,13 @@ from tensorboard.backend.event_processing.event_accumulator import EventAccumula
 
 SCRIPT_PATH = os.path.realpath(__file__)
 DATA_DIR = os.path.normpath(SCRIPT_PATH + "/../../../data")
-EXPERIMENT_NAME_REGEX = re.compile(r"q4_2_lr[0-9.]+_bs[0-9]+([_a-z]*)_HalfCheetah-v4")
-TAG_TO_LABEL = OrderedDict(
-    [
-        ("", "Standard"),
-        ("_nnbaseline", "NN baseline"),
-        ("_rtg", "Reward-to-go"),
-        ("_rtg_nnbaseline", "Reward-to-go, NN baseline"),
-    ]
-)
-GRAPH_TITLE = "Training curve for HalfCheetah-v4 using different addons"
+EXPERIMENT_NAME_REGEX = re.compile(r"q5_lr0.001+_bs2000+_lambda([0-9.]+)_HalfCheetah-v4")
+GRAPH_TITLE = "Training curve for Hopper-v4 using generalised advantage estimation for different lambdas"
 COLOURMAP = "Set1"
 
 print("Loading log data...")
 
-# A list of elements `(tag, Eval_AverageReturn)`
+# A list of elements `(gae_lambda, Eval_AverageReturn)`
 experiment_logs = []
 
 for filename in os.listdir(DATA_DIR):
@@ -37,7 +29,7 @@ for filename in os.listdir(DATA_DIR):
     if not regex_match or not os.path.isdir(filepath):
         continue
 
-    tag = regex_match.group(1)
+    gae_lambda = float(regex_match.group(1))
 
     # Load the logs
     event_acc = EventAccumulator(filepath)
@@ -47,10 +39,10 @@ for filename in os.listdir(DATA_DIR):
     for i, event in enumerate(event_list):
         assert i == event.step
         curve.append(event.value)
-    experiment_logs.append((tag, np.array(curve)))
+    experiment_logs.append((gae_lambda, np.array(curve)))
 
-# Sort the logs according to `TAG_TO_LABEL`
-experiment_logs.sort(key=lambda t: list(TAG_TO_LABEL.keys()).index(t[0]))
+# Sort the logs according to lambda
+experiment_logs.sort(key=lambda t: t[0])
 
 print("Plotting graph...")
 
@@ -58,8 +50,8 @@ cmap = mpl.colormaps[COLOURMAP]
 
 fig, ax = plt.subplots(1, 1, figsize=(15, 10))
 
-for i, (tag, avg_return) in enumerate(experiment_logs):
-    label = TAG_TO_LABEL[tag]
+for i, (gae_lambda, avg_return) in enumerate(experiment_logs):
+    label = f"Lambda {gae_lambda}"
     x_values = np.arange(avg_return.shape[0])
     ax.plot(x_values, avg_return, color=cmap(i), label=label)
 
