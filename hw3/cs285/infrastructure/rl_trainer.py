@@ -3,24 +3,26 @@ import pickle
 import os
 import sys
 import time
-from cs285.infrastructure.atari_wrappers import ReturnWrapper
+from typing import Optional, Tuple
 
 import gym
 from gym import wrappers
 import numpy as np
 import torch
+
 from cs285.infrastructure import pytorch_util as ptu
 
+from cs285.policies.base_policy import BasePolicy
 from cs285.infrastructure.utils import Path
 from cs285.infrastructure import utils
 from cs285.infrastructure.logger import Logger
-
 from cs285.agents.dqn_agent import DQNAgent
 from cs285.agents.sac_agent import SACAgent
 from cs285.infrastructure.dqn_utils import (
     get_wrapper_by_name,
     register_custom_envs,
 )
+from cs285.infrastructure.atari_wrappers import ReturnWrapper
 
 # how many rollouts to save as videos to tensorboard
 MAX_NVIDEO = 2
@@ -29,7 +31,6 @@ MAX_VIDEO_LEN = 40  # we overwrite this in the code below
 
 class RL_Trainer(object):
     def __init__(self, params):
-
         #############
         ## INIT
         #############
@@ -133,13 +134,13 @@ class RL_Trainer(object):
 
     def run_training_loop(
         self,
-        n_iter,
-        collect_policy,
-        eval_policy,
-        initial_expertdata=None,
-        relabel_with_expert=False,
-        start_relabel_with_expert=1,
-        expert_policy=None,
+        n_iter: int,
+        collect_policy: BasePolicy,
+        eval_policy: BasePolicy,
+        initial_expertdata: Optional[str] = None,
+        relabel_with_expert: bool = False,
+        start_relabel_with_expert: int = 1,
+        expert_policy: Optional[BasePolicy] = None,
     ):
         """
         :param n_iter:  number of (dagger) iterations
@@ -194,7 +195,7 @@ class RL_Trainer(object):
                     envsteps_this_batch,
                     train_video_paths,
                 ) = self.collect_training_trajectories(
-                    itr, initial_expertdata, collect_policy, use_batchsize
+                    itr, collect_policy, use_batchsize, initial_expertdata
                 )
 
             self.total_envsteps += envsteps_this_batch
@@ -230,7 +231,9 @@ class RL_Trainer(object):
     ####################################
     ####################################
 
-    def run_sac_training_loop(self, n_iter, collect_policy, eval_policy):
+    def run_sac_training_loop(
+        self, n_iter: int, collect_policy: BasePolicy, eval_policy: BasePolicy
+    ):
         """
         :param n_iter:  number of (dagger) iterations
         :param collect_policy:
@@ -330,12 +333,12 @@ class RL_Trainer(object):
 
     def collect_training_trajectories(
         self,
-        itr,
-        initial_expertdata,
-        collect_policy,
-        num_transitions_to_sample,
-        save_expert_data_to_disk=False,
-    ):
+        itr: int,
+        collect_policy: BasePolicy,
+        num_transitions_to_sample: int,
+        load_initial_expertdata: Optional[str] = None,
+        save_expert_data_to_disk: bool = False,
+    ) -> Tuple["list[dict]", int, Optional["list[dict]"]]:
         """
         :param itr:
         :param load_initial_expertdata:  path to expert data pkl file
@@ -394,8 +397,14 @@ class RL_Trainer(object):
 
         self.logger.flush()
 
-    def perform_logging(self, itr, paths, eval_policy, train_video_paths, all_logs):
-
+    def perform_logging(
+        self,
+        itr: int,
+        paths: "list[dict]",
+        eval_policy: BasePolicy,
+        train_video_paths: "Optional[list[dict]]",
+        all_logs: list,
+    ):
         last_log = all_logs[-1]
 
         #######################
@@ -475,8 +484,14 @@ class RL_Trainer(object):
     ####################################
     ####################################
 
-    def perform_sac_logging(self, itr, stats, eval_policy, train_video_paths, all_logs):
-
+    def perform_sac_logging(
+        self,
+        itr: int,
+        stats: dict,
+        eval_policy: BasePolicy,
+        train_video_paths: "Optional[list[dict]]",
+        all_logs: list,
+    ):
         last_log = all_logs[-1]
 
         #######################
