@@ -13,3 +13,4 @@ swig==4.0.2
 box2d-py==2.3.8
 pyglet==1.5.26
 networkx==2.5
+scipy==1.10.1
