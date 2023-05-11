@@ -50,13 +50,17 @@ The following shows the training curve for the `LunarLanderContinuous-v2` enviro
 
 ## Experiment 4
 
-I now try `HalfCheetah-v4` using the neural network baseline and reward-to-go, testing various learning rates and batch sizes.
+I now try `HalfCheetah-v4` using the neural network baseline and reward-to-go, testing various learning rates and batch sizes. The first presents the raw data, the second presents the data smoothed using a Gaussian filter.
 
 | ![Training curve for HalfCheetah-v4 using a neural network baseline and reward-to-go across different learning rates and batch sizes](images/q4_part1.png) |
 |:--:| 
 | *Training curve for HalfCheetah-v4 using a neural network baseline and reward-to-go across different learning rates and batch sizes* |
 
-Higher learning rates consistently yield better results. For the learning rates 0.005 and 0.01 larger batch sizes give better results. For 0.02 however the best batch size is 30000 (though this has higher variance and doesn't perform as well as 50000 initially).
+| ![Training curve for HalfCheetah-v4 using a neural network baseline and reward-to-go across different learning rates and batch sizes, using Gaussian smoothing sigma=2](images/q4_part1_sigma2.png) |
+|:--:| 
+| *Training curve for HalfCheetah-v4 using a neural network baseline and reward-to-go across different learning rates and batch sizes, using Gaussian smoothing sigma=2* |
+
+Higher learning rates and larger batch sizes consistently yield better results, though with higher variances.
 
 
 ## Experiment 5

@@ -24,7 +24,7 @@ def get_experiment_progress(output_string: str) -> "int | None":
 experiment_commands = []
 parameter_grid = list(itertools.product(LR_VALUES, BATCH_SIZE_VALUES))
 for i, (lr, batch_size) in enumerate(parameter_grid):
-    exp_name = f"q4_lr{lr}_bs{batch_size}"
+    exp_name = f"q4_search_lr{lr}_bs{batch_size}"
     cmd = [
         "python",
         RUN_SCRIPT_PATH,
