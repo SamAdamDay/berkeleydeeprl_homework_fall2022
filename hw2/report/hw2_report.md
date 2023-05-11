@@ -56,4 +56,21 @@ I now try `HalfCheetah-v4` using the neural network baseline and reward-to-go, t
 |:--:| 
 | *Training curve for HalfCheetah-v4 using a neural network baseline and reward-to-go across different learning rates and batch sizes* |
 
-Higher learning rates consistently yield better results. For the learning rates `0.005` and `0.01` larger batch sizes give better results. For `0.02` however the best batch size is `30000` (though this has higher variance and doesn't perform as well as `50000` initially).
+Higher learning rates consistently yield better results. For the learning rates 0.005 and 0.01 larger batch sizes give better results. For 0.02 however the best batch size is 30000 (though this has higher variance and doesn't perform as well as 50000 initially).
+
+
+## Experiment 5
+
+The following graphs show the result of using generalised advantage estimation (GAE) for various values of lambda. The first presents the raw data, the second presents the data smoothed using a Gaussian filter.
+
+
+| ![Training curve for Hopper-v4 using generalised advantage estimation for different lambdas](images/q5_sigma0.png) |
+|:--:| 
+| *Training curve for Hopper-v4 using generalised advantage estimation for different lambdas* |
+
+
+| ![Training curve for Hopper-v4 using generalised advantage estimation for different lambdas with Gaussian smoothing sigma=2](images/q5_sigma2.png) |
+|:--:| 
+| *Training curve for Hopper-v4 using generalised advantage estimation for different lambdas with Gaussian smoothing sigma=2* |
+
+The higher the value of lambda the better the final performance. Setting lambda to be 1 (vanilla neural network baseline estimator) yielded the best final performance. However a lambda of 0.95 gave the best maximum performance.
