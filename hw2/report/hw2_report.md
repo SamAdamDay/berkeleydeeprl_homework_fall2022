@@ -60,7 +60,13 @@ I now try `HalfCheetah-v4` using the neural network baseline and reward-to-go, t
 |:--:| 
 | *Training curve for HalfCheetah-v4 using a neural network baseline and reward-to-go across different learning rates and batch sizes, using Gaussian smoothing sigma=2* |
 
-Higher learning rates and larger batch sizes consistently yield better results, though with higher variances.
+Higher learning rates and larger batch sizes consistently yield better results, though with higher variances. With the best learning rate and batch size combination (0.02, 50000), I compare different combinations of addons to standard reinforcement learning.
+
+| ![Training curve for HalfCheetah-v4 using a the optimal combination of learning rate and batch size, and varying the use of reward-to-go and neural network baseline](images/q4_part2.png) |
+|:--:| 
+| *Training curve for HalfCheetah-v4 using a the optimal combination of learning rate and batch size, and varying the use of reward-to-go and neural network baseline* |
+
+The best performance is obtained by using both reward-to-go and the neural network baseline, though this also has the highest variance.
 
 
 ## Experiment 5
